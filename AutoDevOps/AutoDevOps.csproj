@@ -14,9 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="configurePulumi.sh">
+    <None Remove="configurePulumi.sh" />
+    <Content Include="configurePulumi.sh">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
 
 </Project>
