@@ -13,4 +13,10 @@
     <PackageReference Include="Pulumi.Kubernetes" Version="2.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="configurePulumi.sh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
