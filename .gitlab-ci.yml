@@ -11,3 +11,4 @@ deploy:
     - dotnet nuget push "$PWD/nuget/*.nupkg" --source gitlab
   only:
     - master
+    - tags
