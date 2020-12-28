@@ -1,0 +1,124 @@
+stages:
+  - staging
+  - production
+  - cleanup
+
+.pulumi: &pulumi |
+  function pulumi_deploy() {
+    local track="${1-stable}"
+    local percentage="${2:-100}"
+
+    local name
+    name=$(deploy_name "$track")
+
+    local stable_name
+    stable_name=$(deploy_name stable)
+
+    local image_repository
+    local image_tag
+  
+    use_version
+    source ./docker-image.sh || true
+
+    if [[ -z "$CI_COMMIT_TAG" ]]; then
+      image_repository=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
+      image_tag=${CI_APPLICATION_TAG:-$CI_COMMIT_SHA}
+    else
+      image_repository=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE}
+      image_tag=${CI_APPLICATION_TAG:-$CI_COMMIT_TAG}
+    fi
+
+    env
+
+    cd ./deploy
+    pulumi stack select "$CI_ENVIRONMENT_NAME"
+  
+    pulumi config set --path gitlab.App "$CI_PROJECT_PATH_SLUG"
+    pulumi config set --path gitlab.Env "$CI_ENVIRONMENT_SLUG"
+    pulumi config set --path gitlab.EnvName "$CI_ENVIRONMENT_NAME"
+    pulumi config set --path gitlab.EnvURL "$CI_ENVIRONMENT_URL"
+    pulumi config set --path gitlab.Visibility "$CI_PROJECT_VISIBILITY"
+  
+    pulumi config set --path registry.Server "$CI_REGISTRY"
+    pulumi config set --path registry.User "${CI_DEPLOY_USER:-$CI_REGISTRY_USER}"
+    pulumi config set --secret --path registry.Password "${CI_DEPLOY_PASSWORD:-$CI_REGISTRY_PASSWORD}"
+    pulumi config set --path registry.Email "$GITLAB_USER_EMAIL"
+
+    pulumi config set --path app.Name "$CI_PROJECT_NAME"
+    pulumi config set --path app.SecretName "$APPLICATION_SECRET_NAME"
+    pulumi config set --path app.SecretChecksum "$APPLICATION_SECRET_CHECKSUM"
+    pulumi config set --path app.Track "$track"
+  
+    pulumi config set --path deploy.Image "$image_repository"
+    pulumi config set --path deploy.ImageTag "$image_tag"
+    pulumi config set --path deploy.Percentage "$percentage"
+    pulumi config set --path deploy.Release "$CI_ENVIRONMENT_NAME"
+    pulumi config set --path deploy.Namespace "$KUBE_NAMESPACE"
+    pulumi config set --path deploy.Url "$CI_ENVIRONMENT_URL"
+  
+    # pulumi config set --path service.CommonName "le-$CI_PROJECT_ID.$KUBE_INGRESS_BASE_DOMAIN"
+    # pulumi config set --path service.Url "$CI_ENVIRONMENT_URL"
+
+    pulumi refresh -y
+    pulumi up -y -f -r
+  
+    pulumi stack tag set app:version "$APPLICATION_VERSION"
+    pulumi stack tag set app:image "$image_repository:$image_tag"
+    pulumi stack tag set app:url "$CI_ENVIRONMENT_URL"
+    pulumi stack tag set app:namespace "$KUBE_NAMESPACE"
+  }
+
+  function deploy_name() {
+    local name="$RELEASE_NAME"
+    local track="${1-stable}"
+
+    if [[ "$track" != "stable" ]]; then
+      name="$name-$track"
+    fi
+
+    echo $name
+  }
+
+  function use_version() {
+    [ -f version.sh ] && source ./version.sh
+    tag=${APPLICATION_VERSION/+/-}
+    export CI_APPLICATION_TAG=${tag:-$CI_APPLICATION_TAG}
+  }
+
+
+.deploy:
+  allow_failure: false
+  image: registry.ubiquitous.no/gitlab/auto-deploy-image:latest
+  script:
+    - auto-deploy check_kube_domain
+    - *pulumi
+    - pulumi_deploy
+    - auto-deploy persist_environment_url
+  dependencies:
+    - version
+    - build
+
+staging:
+  extends: .deploy
+  stage: staging
+  only:
+    refs:
+      - master
+  environment:
+    name: staging
+    url: https://myapp-staging.$KUBE_INGRESS_BASE_DOMAIN
+    kubernetes:
+      namespace: myapp-staging
+
+production:
+  extends: .deploy
+  stage: production
+  only:
+    refs:
+      - master
+  when: manual
+  environment:
+    name: production
+    url: https://myapp.$KUBE_INGRESS_BASE_DOMAIN
+    kubernetes:
+      namespace: project-prod
