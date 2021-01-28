@@ -16,7 +16,7 @@ namespace AutoDevOps.Resources {
             foreach (DictionaryEntry entry in env) {
                 var key = (string) entry.Key;
 
-                if (key.StartsWith("K8S_") && entry.Value != null) vars[key.Remove(0, 4)] = (string) entry.Value;
+                if (key.StartsWith("K8S_SECRET_") && entry.Value != null) vars[key.Remove(0, 11)] = (string) entry.Value;
             }
 
             if (settings.Env != null) {
