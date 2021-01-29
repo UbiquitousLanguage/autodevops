@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AutoDevOps.Resources;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Networking.V1;
+using Pulumi.Kubernetes.Types.Inputs.Apps.V1;
 using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using Deployment = Pulumi.Kubernetes.Apps.V1.Deployment;
 using static System.Environment;
@@ -16,11 +17,12 @@ namespace AutoDevOps {
 
         public AutoDevOps(
             AutoDevOpsSettings          settings,
-            IEnumerable<ContainerArgs>? sidecars           = null,
-            Action<ContainerArgs>?      configureContainer = null,
-            Action<PodSpecArgs>?        configurePod       = null,
-            Dictionary<string, string>? serviceAnnotations = null,
-            Dictionary<string, string>? ingressAnnotations = null
+            IEnumerable<ContainerArgs>? sidecars            = null,
+            Action<ContainerArgs>?      configureContainer  = null,
+            Action<PodSpecArgs>?        configurePod        = null,
+            Action<DeploymentArgs>?     configureDeployment = null,
+            Dictionary<string, string>? serviceAnnotations  = null,
+            Dictionary<string, string>? ingressAnnotations  = null
         ) {
             var @namespace    = KubeNamespace.Create(settings.Deploy.Namespace);
             var namespaceName = @namespace.Metadata.Apply(x => x.Name);
@@ -35,30 +37,44 @@ namespace AutoDevOps {
 
             if (replicas == 0) {
                 DeploymentResult = new Result {
-                    Namespace   = @namespace,
+                    Namespace = @namespace,
                 };
                 return;
             }
 
             var stableTrack = settings.Application.Track == "stable";
-            var appSecret = KubeSecret.CreateAppSecret(namespaceName, settings);
-            var deployment = KubeDeployment.Create(namespaceName, settings, replicas, imagePullSecret, appSecret, sidecars, configureContainer, configurePod);
+            var appSecret   = KubeSecret.CreateAppSecret(namespaceName, settings);
+
+            var deployment = KubeDeployment.Create(
+                namespaceName,
+                settings,
+                replicas,
+                imagePullSecret,
+                appSecret,
+                sidecars,
+                configureContainer,
+                configurePod,
+                configureDeployment
+            );
             var service = settings.Service.Enabled && stableTrack ? KubeService.Create(namespaceName, settings, serviceAnnotations) : null;
-            var ingress = settings.Ingress.Enabled && stableTrack ? KubeIngress.Create(namespaceName, settings, settings.Ingress.Class, ingressAnnotations) : null;
+
+            var ingress = settings.Ingress.Enabled && stableTrack
+                ? KubeIngress.Create(namespaceName, settings, settings.Ingress.Class, ingressAnnotations)
+                : null;
 
             DeploymentResult = new Result {
-                Namespace   = @namespace,
-                Deployment  = deployment,
-                Service     = service,
-                Ingress     = ingress
+                Namespace  = @namespace,
+                Deployment = deployment,
+                Service    = service,
+                Ingress    = ingress
             };
         }
 
         public class Result {
-            public Deployment?     Deployment  { get; init; }
-            public Service?        Service     { get; init; }
-            public Ingress?        Ingress     { get; init; }
-            public Namespace?      Namespace   { get; init; }
+            public Deployment? Deployment { get; init; }
+            public Service?    Service    { get; init; }
+            public Ingress?    Ingress    { get; init; }
+            public Namespace?  Namespace  { get; init; }
         }
 
         static int GetReplicas(string? track = null, int percentage = 100) {

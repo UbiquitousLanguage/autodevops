@@ -15,9 +15,10 @@ namespace AutoDevOps.Resources {
             int                         replicas,
             Secret?                     imagePullSecret,
             Secret?                     appSecret,
-            IEnumerable<ContainerArgs>? sidecars           = null,
-            Action<ContainerArgs>?      configureContainer = null,
-            Action<PodSpecArgs>?        configurePod       = null
+            IEnumerable<ContainerArgs>? sidecars            = null,
+            Action<ContainerArgs>?      configureContainer  = null,
+            Action<PodSpecArgs>?        configurePod        = null,
+            Action<DeploymentArgs>?     configureDeployment = null
         ) {
             var appLabels = settings
                 .BaseLabels()
@@ -78,6 +79,7 @@ namespace AutoDevOps.Resources {
                     }
                 }
             };
+            configureDeployment?.Invoke(deployment);
 
             return new Deployment(settings.PulumiName("deployment"), deployment);
         }
