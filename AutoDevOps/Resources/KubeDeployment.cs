@@ -23,7 +23,8 @@ namespace AutoDevOps.Resources {
             var appLabels = settings
                 .BaseLabels()
                 .AddPair("track", settings.Application.Track)
-                .AddPair("tier", settings.Application.Tier);
+                .AddPair("tier", settings.Application.Tier)
+                .AddPair("version", settings.Application.Version);
 
             var gitLabAnnotations = settings.GitLabAnnotations();
 

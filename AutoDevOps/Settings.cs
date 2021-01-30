@@ -30,20 +30,21 @@ namespace AutoDevOps {
         public PrometheusSettings Prometheus  { get; }
 
         public class DeploySettings {
-            public string Namespace       { get; set; } = null!;
-            public string Release         { get; set; } = null!;
-            public int    Replicas        { get; set; }
-            public int    Percentage      { get; set; }
-            public string Image           { get; set; } = null!;
-            public string ImageTag        { get; set; } = null!;
-            public string Url             { get; set; } = null!;
+            public string Namespace  { get; set; } = null!;
+            public string Release    { get; set; } = null!;
+            public int    Replicas   { get; set; }
+            public int    Percentage { get; set; }
+            public string Image      { get; set; } = null!;
+            public string ImageTag   { get; set; } = null!;
+            public string Url        { get; set; } = null!;
         }
 
         public class AppSettings {
-            public string Name  { get; set; } = null!;
-            public string Tier  { get; set; } = null!;
-            public string Track { get; set; } = null!;
-            public int    Port  { get; set; }
+            public string Name    { get; set; } = null!;
+            public string Tier    { get; set; } = null!;
+            public string Track   { get; set; } = null!;
+            public string Version { get; set; } = null!;
+            public int    Port    { get; set; }
         }
 
         public class GitLabSettings {
