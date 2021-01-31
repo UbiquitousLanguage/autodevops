@@ -7,7 +7,9 @@ using Pulumi.Kubernetes.Types.Inputs.Networking.V1;
 
 namespace AutoDevOps.Resources {
     static class KubeIngress {
-        internal static Ingress Create(Output<string> namespaceName, AutoDevOpsSettings settings, string ingressClass, Dictionary<string, string>? annotations) {
+        internal static Ingress Create(
+            Output<string> namespaceName, AutoDevOpsSettings settings, string ingressClass, Dictionary<string, string>? annotations
+        ) {
             var ingressLabels = settings.BaseLabels();
             var tlsEnabled    = settings.Ingress.Tls?.Enabled == true;
 
@@ -15,7 +17,11 @@ namespace AutoDevOps.Resources {
                 .AsInputMap()
                 .AddPair("kubernetes.io/ingress.class", ingressClass)
                 .AddPairIf(tlsEnabled, "kubernetes.io/tls-acme", "true")
-                .AddPairIf(settings.Prometheus.Metrics, "nginx.ingress.kubernetes.io/server-snippet", "location /metrics { deny all; }");
+                .AddPairIf(
+                    settings.Prometheus.Metrics && ingressClass.Contains("nginx"),
+                    "nginx.ingress.kubernetes.io/server-snippet",
+                    "location /metrics { deny all; }"
+                );
 
             var uri = new Uri(settings.Deploy.Url);
 

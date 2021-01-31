@@ -29,64 +29,32 @@ namespace AutoDevOps {
         public IngressSettings    Ingress     { get; }
         public PrometheusSettings Prometheus  { get; }
 
-        public class DeploySettings {
-            public string Namespace  { get; set; } = null!;
-            public string Release    { get; set; } = null!;
-            public int    Replicas   { get; set; }
-            public int    Percentage { get; set; }
-            public string Image      { get; set; } = null!;
-            public string ImageTag   { get; set; } = null!;
-            public string Url        { get; set; } = null!;
-        }
+        public record DeploySettings(
+            string Namespace,
+            string Release,
+            int    Replicas,
+            int    Percentage,
+            string Image,
+            string ImageTag,
+            string Url
+        );
 
-        public class AppSettings {
-            public string Name    { get; set; } = null!;
-            public string Tier    { get; set; } = null!;
-            public string Track   { get; set; } = null!;
-            public string Version { get; set; } = null!;
-            public int    Port    { get; set; }
-        }
+        public record AppSettings(string Name, string Tier, string Track, string? Version, int Port);
 
-        public class GitLabSettings {
-            public string  App        { get; set; } = "";
-            public string  Env        { get; set; } = "development";
-            public string  EnvName    { get; set; } = "development";
-            public string? EnvUrl     { get; set; }
-            public string  Visibility { get; set; } = "";
-        }
+        public record GitLabSettings(
+            string App = "", string Env = "development", string EnvName = "development", string? EnvUrl = null, string Visibility = ""
+        );
 
-        public class RegistrySettings {
-            public string Server   { get; set; }
-            public string User     { get; set; }
-            public string Password { get; set; }
-            public string Email    { get; set; }
-        }
+        public record RegistrySettings(string Server, string User, string Password, string Email);
 
-        public class ServiceSettings {
-            public bool   Enabled      { get; set; }
-            public string Type         { get; set; } = null!;
-            public int    ExternalPort { get; set; }
-        }
+        public record ServiceSettings(bool Enabled, string Type, int ExternalPort);
 
-        public class TlsSettings {
-            public bool    Enabled    { get; set; }
-            public string? SecretName { get; set; }
-        }
+        public record TlsSettings(bool Enabled, string? SecretName);
 
-        public class IngressSettings {
-            public bool         Enabled { get; set; }
-            public string       Class   { get; set; } = "nginx";
-            public TlsSettings? Tls     { get; set; }
-        }
+        public record IngressSettings(bool Enabled, TlsSettings? Tls, string Class = "nginx");
 
-        public class PrometheusSettings {
-            public bool   Metrics { get; set; }
-            public string Path    { get; set; }
-        }
+        public record PrometheusSettings(bool Metrics, string Path = "/metrics", bool Operator = false);
 
-        public class EnvVar {
-            public string Name  { get; set; } = null!;
-            public string Value { get; set; } = null!;
-        }
+        public record EnvVar(string Name, string Value);
     }
 }

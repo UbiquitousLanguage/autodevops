@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AutoDevOps.Addons;
 using AutoDevOps.Resources;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Networking.V1;
@@ -57,11 +58,23 @@ namespace AutoDevOps {
                 configurePod,
                 configureDeployment
             );
-            var service = settings.Service.Enabled && stableTrack ? KubeService.Create(namespaceName, settings, serviceAnnotations) : null;
+
+            var service = settings.Service.Enabled && stableTrack
+                ? KubeService.Create(namespaceName, settings, deployment, serviceAnnotations)
+                : null;
 
             var ingress = settings.Ingress.Enabled && stableTrack
                 ? KubeIngress.Create(namespaceName, settings, settings.Ingress.Class, ingressAnnotations)
                 : null;
+
+            if (settings.Prometheus.Metrics && settings.Prometheus.Operator) {
+                if (service != null) {
+                    Prometheus.CreateServiceMonitor(settings, service, @namespace);
+                }
+                else {
+                    Prometheus.CreatePodMonitor(settings, deployment, @namespace);
+                }
+            }
 
             DeploymentResult = new Result {
                 Namespace  = @namespace,

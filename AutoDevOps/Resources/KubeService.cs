@@ -7,16 +7,22 @@ using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 namespace AutoDevOps.Resources {
     static class KubeService {
         internal static Service Create(
-            Output<string>              namespaceName,
-            AutoDevOpsSettings          settings,
-            Dictionary<string, string>? annotations
+            Output<string>                       namespaceName,
+            AutoDevOpsSettings                   settings,
+            Pulumi.Kubernetes.Apps.V1.Deployment deployment,
+            Dictionary<string, string>?          annotations
         ) {
             var serviceLabels = settings.BaseLabels();
 
             var serviceAnnotations = (annotations ?? new Dictionary<string, string>())
-                .AsInputMap()
-                .AddPairIf(settings.Prometheus.Metrics, "prometheus.io/scrape", "true")
-                .AddPairIf(settings.Prometheus.Metrics, "prometheus.io/port", settings.Service.ExternalPort.ToString());
+                .AsInputMap();
+
+            if (settings.Prometheus.Metrics && !settings.Prometheus.Operator) {
+                serviceAnnotations
+                    .AddPair("prometheus.io/scrape", "true")
+                    .AddPair("prometheus.io/path", settings.Prometheus.Path)
+                    .AddPair("prometheus.io/port", settings.Service.ExternalPort.ToString());
+            }
 
             return new Service(
                 settings.PulumiName("service"),
@@ -37,10 +43,7 @@ namespace AutoDevOps.Resources {
                                 Protocol   = "TCP"
                             }
                         },
-                        Selector = new InputMap<string> {
-                            {"app", settings.Application.Name},
-                            {"tier", settings.Application.Tier}
-                        }
+                        Selector = deployment.Spec.Apply(x => x.Selector.MatchLabels)
                     }
                 }
             );

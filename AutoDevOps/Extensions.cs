@@ -9,13 +9,13 @@ namespace AutoDevOps {
     public static class Extensions {
         public static InputMap<string> AsInputMap(this Dictionary<string, string>? dict) => dict ?? new Dictionary<string, string>();
 
-        public static InputMap<string> AddPair(this InputMap<string> inputMap, string key, string value) {
-            inputMap.Add(key, value);
+        public static InputMap<string> AddPair(this InputMap<string> inputMap, string key, string? value) {
+            inputMap.Add(key, value ?? "");
             return inputMap;
         }
 
-        public static InputMap<string> AddPairIf(this InputMap<string> inputMap, bool condition, string key, string value) {
-            if (condition) inputMap.Add(key, value);
+        public static InputMap<string> AddPairIf(this InputMap<string> inputMap, bool condition, string key, string? value) {
+            if (condition) inputMap.Add(key, value ?? "");
             return inputMap;
         }
 
@@ -45,7 +45,7 @@ namespace AutoDevOps {
             return pod;
         }
 
-        public static string? Or(this string? val, string? alt) => string.IsNullOrEmpty(val) ? alt : val;
+        public static string Or(this string? val, string alt) => string.IsNullOrEmpty(val) ? alt : val;
 
         public static int IntOr(this string? val, int alt) => !string.IsNullOrWhiteSpace(val) && int.TryParse(val, out var intVal) ? intVal : alt;
         
