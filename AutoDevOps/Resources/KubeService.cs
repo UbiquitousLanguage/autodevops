@@ -31,7 +31,7 @@ namespace AutoDevOps.Resources {
                         Type = settings.Service.Type,
                         Ports = new[] {
                             new ServicePortArgs {
-                                Name       = settings.Application.Name,
+                                Name       = "web",
                                 Port       = settings.Service.ExternalPort,
                                 TargetPort = settings.Application.Port,
                                 Protocol   = "TCP"
