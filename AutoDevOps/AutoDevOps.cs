@@ -17,14 +17,15 @@ namespace AutoDevOps {
 
         public AutoDevOps(
             AutoDevOpsSettings          settings,
-            IEnumerable<ContainerArgs>? sidecars            = null,
-            Action<ContainerArgs>?      configureContainer  = null,
-            Action<PodSpecArgs>?        configurePod        = null,
-            Action<DeploymentArgs>?     configureDeployment = null,
-            Dictionary<string, string>? serviceAnnotations  = null,
-            Dictionary<string, string>? ingressAnnotations  = null
+            IEnumerable<ContainerArgs>? sidecars             = null,
+            Action<ContainerArgs>?      configureContainer   = null,
+            Action<PodSpecArgs>?        configurePod         = null,
+            Action<DeploymentArgs>?     configureDeployment  = null,
+            Dictionary<string, string>? serviceAnnotations   = null,
+            Dictionary<string, string>? ingressAnnotations   = null,
+            Dictionary<string, string>? namespaceAnnotations = null
         ) {
-            var @namespace    = KubeNamespace.Create(settings.Deploy.Namespace);
+            var @namespace    = KubeNamespace.Create(settings.Deploy.Namespace, namespaceAnnotations);
             var namespaceName = @namespace.Metadata.Apply(x => x.Name);
 
             var imagePullSecret = settings.GitLab.Visibility != "public" && settings.Registry != null
