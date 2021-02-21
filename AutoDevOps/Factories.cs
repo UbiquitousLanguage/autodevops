@@ -17,6 +17,7 @@ namespace AutoDevOps {
 
         public static HTTPIngressPathArgs HttpIngressPath(string serviceName, int servicePort, string path)
             => new() {
+                PathType = "Prefix",
                 Path = path,
                 Backend = new IngressBackendArgs {
                     Service = new IngressServiceBackendArgs {
