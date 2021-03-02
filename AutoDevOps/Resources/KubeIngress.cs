@@ -8,7 +8,11 @@ using Pulumi.Kubernetes.Types.Inputs.Networking.V1;
 namespace AutoDevOps.Resources {
     static class KubeIngress {
         internal static Ingress Create(
-            Output<string> namespaceName, AutoDevOpsSettings settings, string ingressClass, Dictionary<string, string>? annotations
+            Output<string>              namespaceName,
+            AutoDevOpsSettings          settings,
+            string                      ingressClass,
+            Dictionary<string, string>? annotations,
+            ProviderResource?           providerResource = null
         ) {
             var ingressLabels = settings.BaseLabels();
             var tlsEnabled    = settings.Ingress.Tls?.Enabled == true;
@@ -45,7 +49,11 @@ namespace AutoDevOps.Resources {
                 }
             };
 
-            return new Ingress(settings.PulumiName("ingress"), ingress);
+            return new Ingress(
+                settings.PulumiName("ingress"),
+                ingress,
+                new CustomResourceOptions {Provider = providerResource}
+            );
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AutoDevOps.Addons;
 using AutoDevOps.Resources;
+using Pulumi;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Networking.V1;
 using Pulumi.Kubernetes.Types.Inputs.Apps.V1;
@@ -24,13 +25,14 @@ namespace AutoDevOps {
             Action<DeploymentArgs>?     configureDeployment  = null,
             Dictionary<string, string>? serviceAnnotations   = null,
             Dictionary<string, string>? ingressAnnotations   = null,
-            Dictionary<string, string>? namespaceAnnotations = null
+            Dictionary<string, string>? namespaceAnnotations = null,
+            ProviderResource?           provider             = null
         ) {
-            var @namespace    = KubeNamespace.Create(settings.Deploy.Namespace, namespaceAnnotations);
+            var @namespace    = KubeNamespace.Create(settings.Deploy.Namespace, namespaceAnnotations, provider);
             var namespaceName = @namespace.Metadata.Apply(x => x.Name);
 
             var imagePullSecret = settings.GitLab.Visibility != "public" && settings.Registry != null
-                ? KubeSecret.CreateRegistrySecret(namespaceName, settings.Registry)
+                ? KubeSecret.CreateRegistrySecret(namespaceName, settings.Registry, provider)
                 : null;
 
             var replicas = settings.Deploy.Percentage > 0 || settings.Deploy.Replicas == 0
@@ -38,14 +40,12 @@ namespace AutoDevOps {
                 : settings.Deploy.Replicas;
 
             if (replicas == 0) {
-                DeploymentResult = new Result {
-                    Namespace = @namespace,
-                };
+                DeploymentResult = new Result { Namespace = @namespace };
                 return;
             }
 
             var stableTrack = settings.Application.Track == "stable";
-            var appSecret   = KubeSecret.CreateAppSecret(namespaceName, settings);
+            var appSecret   = KubeSecret.CreateAppSecret(namespaceName, settings, provider);
 
             var deployment = KubeDeployment.Create(
                 namespaceName,
@@ -56,23 +56,24 @@ namespace AutoDevOps {
                 sidecars,
                 configureContainer,
                 configurePod,
-                configureDeployment
+                configureDeployment,
+                provider
             );
 
             var service = settings.Service.Enabled && stableTrack
-                ? KubeService.Create(namespaceName, settings, deployment, serviceAnnotations)
+                ? KubeService.Create(namespaceName, settings, deployment, serviceAnnotations, provider)
                 : null;
 
             var ingress = settings.Ingress.Enabled && stableTrack
-                ? KubeIngress.Create(namespaceName, settings, settings.Ingress.Class, ingressAnnotations)
+                ? KubeIngress.Create(namespaceName, settings, settings.Ingress.Class, ingressAnnotations, provider)
                 : null;
 
             if (settings.Prometheus.Metrics && settings.Prometheus.Operator) {
                 if (service != null) {
-                    Prometheus.CreateServiceMonitor(settings, service, @namespace);
+                    Prometheus.CreateServiceMonitor(settings, service, @namespace, provider);
                 }
                 else {
-                    Prometheus.CreatePodMonitor(settings, deployment, @namespace);
+                    Prometheus.CreatePodMonitor(settings, deployment, @namespace, provider);
                 }
             }
 

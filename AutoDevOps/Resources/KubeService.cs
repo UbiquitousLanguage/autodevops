@@ -10,7 +10,8 @@ namespace AutoDevOps.Resources {
             Output<string>                       namespaceName,
             AutoDevOpsSettings                   settings,
             Pulumi.Kubernetes.Apps.V1.Deployment deployment,
-            Dictionary<string, string>?          annotations
+            Dictionary<string, string>?          annotations,
+            ProviderResource?                    providerResource = null
         ) {
             var serviceLabels = settings.BaseLabels();
 
@@ -45,6 +46,9 @@ namespace AutoDevOps.Resources {
                         },
                         Selector = deployment.Spec.Apply(x => x.Selector.MatchLabels)
                     }
+                },
+                new CustomResourceOptions {
+                    Provider = providerResource
                 }
             );
         }

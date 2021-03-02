@@ -18,7 +18,8 @@ namespace AutoDevOps.Resources {
             IEnumerable<ContainerArgs>? sidecars            = null,
             Action<ContainerArgs>?      configureContainer  = null,
             Action<PodSpecArgs>?        configurePod        = null,
-            Action<DeploymentArgs>?     configureDeployment = null
+            Action<DeploymentArgs>?     configureDeployment = null,
+            ProviderResource?           providerResource    = null
         ) {
             var appLabels = settings
                 .BaseLabels()
@@ -54,8 +55,8 @@ namespace AutoDevOps.Resources {
             if (sidecars != null) containers.AddRange(sidecars);
 
             var podSpec = new PodSpecArgs {
-                ImagePullSecrets              = CreateArgs.ImagePullSecrets(imagePullSecret?.Metadata.Apply(x => x.Name)),
-                Containers                    = containers,
+                ImagePullSecrets = CreateArgs.ImagePullSecrets(imagePullSecret?.Metadata.Apply(x => x.Name)),
+                Containers = containers,
                 TerminationGracePeriodSeconds = 60
             };
             configurePod?.Invoke(podSpec);
@@ -82,7 +83,11 @@ namespace AutoDevOps.Resources {
             };
             configureDeployment?.Invoke(deployment);
 
-            return new Deployment(settings.PulumiName("deployment"), deployment);
+            return new Deployment(
+                settings.PulumiName("deployment"),
+                deployment,
+                new CustomResourceOptions {Provider = providerResource}
+            );
         }
     }
 }

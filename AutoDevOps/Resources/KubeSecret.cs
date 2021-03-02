@@ -8,7 +8,11 @@ using static System.Environment;
 
 namespace AutoDevOps.Resources {
     static class KubeSecret {
-        internal static Secret? CreateAppSecret(Output<string> namespaceName, AutoDevOpsSettings settings) {
+        internal static Secret? CreateAppSecret(
+            Output<string>     namespaceName,
+            AutoDevOpsSettings settings,
+            ProviderResource?  providerResource = null
+        ) {
             var env = GetEnvironmentVariables();
 
             var vars = new Dictionary<string, string>();
@@ -16,7 +20,8 @@ namespace AutoDevOps.Resources {
             foreach (DictionaryEntry entry in env) {
                 var key = (string) entry.Key;
 
-                if (key.StartsWith("K8S_SECRET_") && entry.Value != null) vars[key.Remove(0, 11)] = (string) entry.Value;
+                if (key.StartsWith("K8S_SECRET_") && entry.Value != null)
+                    vars[key.Remove(0, 11)] = (string) entry.Value;
             }
 
             if (settings.Env != null) {
@@ -38,15 +43,25 @@ namespace AutoDevOps.Resources {
                     },
                     Type       = "opaque",
                     StringData = vars
+                },
+                new CustomResourceOptions {
+                    Provider = providerResource
                 }
             );
         }
 
-        internal static Secret CreateRegistrySecret(Output<string> @namespace, AutoDevOpsSettings.RegistrySettings registrySettings) {
+        internal static Secret CreateRegistrySecret(
+            Output<string>                      @namespace,
+            AutoDevOpsSettings.RegistrySettings registrySettings,
+            ProviderResource?                   providerResource = null
+        ) {
             const string secretName = "gitlab-registry";
 
-            var creds   = $"{registrySettings.User}:{registrySettings.Password}".Base64Encode();
-            var content = $"{{\"auths\":{{\"{registrySettings.Server}\":{{\"email\":\"{registrySettings.Email}\", \"auth\":\"{creds}\"}}}}}}".Base64Encode();
+            var creds = $"{registrySettings.User}:{registrySettings.Password}".Base64Encode();
+
+            var content =
+                $"{{\"auths\":{{\"{registrySettings.Server}\":{{\"email\":\"{registrySettings.Email}\", \"auth\":\"{creds}\"}}}}}}"
+                    .Base64Encode();
 
             return new Secret(
                 secretName,
@@ -57,6 +72,9 @@ namespace AutoDevOps.Resources {
                     },
                     Type = "kubernetes.io/dockerconfigjson",
                     Data = new InputMap<string> {{".dockerconfigjson", content}}
+                },
+                new CustomResourceOptions {
+                    Provider = providerResource
                 }
             );
         }

@@ -1,3 +1,4 @@
+using Pulumi;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Rbac.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
@@ -5,7 +6,10 @@ using Pulumi.Kubernetes.Types.Inputs.Rbac.V1;
 
 namespace AutoDevOps.Addons {
     public class Jaeger {
-        public static RoleBinding AddJaeger(Namespace kubeNamespace, string jaegerNamespace = "observability")
+        public static RoleBinding AddJaeger(
+            Namespace kubeNamespace, 
+            string jaegerNamespace = "observability",
+            ProviderResource? providerResource = null)
             => new(
                 "jaeger-roleBiding",
                 new RoleBindingArgs {
@@ -26,6 +30,9 @@ namespace AutoDevOps.Addons {
                         Name     = "jaeger-operator",
                         ApiGroup = "rbac.authorization.k8s.io"
                     }
+                },
+                new CustomResourceOptions {
+                    Provider = providerResource
                 }
             );
     }

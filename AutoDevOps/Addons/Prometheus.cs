@@ -9,7 +9,8 @@ namespace AutoDevOps.Addons {
         public static PodMonitor CreatePodMonitor(
             AutoDevOpsSettings                   settings,
             Pulumi.Kubernetes.Apps.V1.Deployment deployment,
-            Namespace                            kubeNamespace
+            Namespace                            kubeNamespace,
+            ProviderResource?                    providerResource = null
         )
             => new(
                 settings.PulumiName("podMonitor"),
@@ -32,13 +33,17 @@ namespace AutoDevOps.Addons {
                             Interval = "15s"
                         }
                     }
+                },
+                new CustomResourceOptions {
+                    Provider = providerResource
                 }
             );
 
         public static ServiceMonitor CreateServiceMonitor(
             AutoDevOpsSettings settings,
             Service            service,
-            Namespace          kubeNamespace
+            Namespace          kubeNamespace,
+            ProviderResource?  providerResource = null
         )
             => new(
                 settings.PulumiName("serviceMonitor"),
@@ -61,6 +66,9 @@ namespace AutoDevOps.Addons {
                             Interval = "15s"
                         }
                     }
+                },
+                new CustomResourceOptions {
+                    Provider = providerResource
                 }
             );
     }
