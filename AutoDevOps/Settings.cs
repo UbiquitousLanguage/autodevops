@@ -20,14 +20,21 @@ namespace AutoDevOps {
 
         public string FullName() => $"{Application.Name}-{GitLab.EnvName}";
 
-        public EnvVar[]?          Env         { get; }
-        public DeploySettings     Deploy      { get; }
-        public AppSettings        Application { get; }
-        public GitLabSettings     GitLab      { get; }
-        public RegistrySettings?  Registry    { get; }
-        public ServiceSettings    Service     { get; }
-        public IngressSettings    Ingress     { get; }
-        public PrometheusSettings Prometheus  { get; }
+        public EnvVar[]? Env { get; }
+
+        public DeploySettings Deploy { get; }
+
+        public AppSettings Application { get; }
+
+        public GitLabSettings GitLab { get; }
+
+        public RegistrySettings? Registry { get; }
+
+        public ServiceSettings Service { get; }
+
+        public IngressSettings Ingress { get; }
+
+        public PrometheusSettings Prometheus { get; }
 
         public record DeploySettings(
             string Namespace,
@@ -39,10 +46,22 @@ namespace AutoDevOps {
             string Url
         );
 
-        public record AppSettings(string Name, string Tier, string Track, string? Version, int Port);
+        public record AppSettings(
+            string  Name,
+            string  Tier,
+            string  Track,
+            string? Version,
+            int     Port           = 5000,
+            string  ReadinessProbe = "/ping",
+            string  LivenessProbe    = "/health"
+        );
 
         public record GitLabSettings(
-            string App = "", string Env = "development", string EnvName = "development", string? EnvUrl = null, string Visibility = ""
+            string  App        = "",
+            string  Env        = "development",
+            string  EnvName    = "development",
+            string? EnvUrl     = null,
+            string  Visibility = ""
         );
 
         public record RegistrySettings(string Server, string User, string Password, string Email);

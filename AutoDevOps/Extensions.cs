@@ -50,5 +50,7 @@ namespace AutoDevOps {
         public static int IntOr(this string? val, int alt) => !string.IsNullOrWhiteSpace(val) && int.TryParse(val, out var intVal) ? intVal : alt;
         
         public static string Base64Encode(this string plainText) => Convert.ToBase64String(UTF8.GetBytes(plainText));
+        
+        public static ProbeArgs HttpProbe(string path, int port) => CreateArgs.HttpProbe(path, port);
     }
 }

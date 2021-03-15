@@ -15,9 +15,6 @@
 
   <ItemGroup>
     <None Remove="configurePulumi.sh" />
-    <Content Include="configurePulumi.sh">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Remove="AutoDevOps.csproj.DotSettings" />
   </ItemGroup>
 

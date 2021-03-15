@@ -49,6 +49,20 @@ namespace AutoDevOps.Resources {
                 };
             }
 
+            if (!string.IsNullOrWhiteSpace(settings.Application.ReadinessProbe)) {
+                container.ReadinessProbe = Extensions.HttpProbe(
+                    settings.Application.ReadinessProbe,
+                    settings.Application.Port
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(settings.Application.LivenessProbe)) {
+                container.LivenessProbe = Extensions.HttpProbe(
+                    settings.Application.LivenessProbe,
+                    settings.Application.Port
+                );
+            }
+
             configureContainer?.Invoke(container);
 
             var containers = new List<ContainerArgs> {container};

@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDevOps", "AutoDevOps\AutoDevOps.csproj", "{869894E2-D339-4472-B5B7-3A421D7C4457}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDevOps.Configure", "AutoDevOps.Configure\AutoDevOps.Configure.csproj", "{C35D46EE-FF52-46BD-B6CA-2DB6C9C71DC9}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,9 +12,5 @@ Global
 		{869894E2-D339-4472-B5B7-3A421D7C4457}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{869894E2-D339-4472-B5B7-3A421D7C4457}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{869894E2-D339-4472-B5B7-3A421D7C4457}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C35D46EE-FF52-46BD-B6CA-2DB6C9C71DC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C35D46EE-FF52-46BD-B6CA-2DB6C9C71DC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C35D46EE-FF52-46BD-B6CA-2DB6C9C71DC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C35D46EE-FF52-46BD-B6CA-2DB6C9C71DC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
