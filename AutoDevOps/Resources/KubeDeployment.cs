@@ -50,14 +50,14 @@ namespace AutoDevOps.Resources {
             }
 
             if (!string.IsNullOrWhiteSpace(settings.Application.ReadinessProbe)) {
-                container.ReadinessProbe = Extensions.HttpProbe(
+                container.ReadinessProbe = CreateArgs.HttpProbe(
                     settings.Application.ReadinessProbe,
                     settings.Application.Port
                 );
             }
 
             if (!string.IsNullOrWhiteSpace(settings.Application.LivenessProbe)) {
-                container.LivenessProbe = Extensions.HttpProbe(
+                container.LivenessProbe = CreateArgs.HttpProbe(
                     settings.Application.LivenessProbe,
                     settings.Application.Port
                 );
