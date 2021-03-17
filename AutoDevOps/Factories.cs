@@ -46,6 +46,12 @@ namespace AutoDevOps {
                 {"memory", memory}
             };
 
-        public static ProbeArgs HttpProbe(string path, int port) => CreateArgs.HttpProbe(path, port);
+        public static ProbeArgs HttpProbe(string path, int port) => new() {
+            HttpGet = new HTTPGetActionArgs {
+                Path   = path,
+                Port   = port,
+                Scheme = "HTTP"
+            }
+        };
     }
 }
