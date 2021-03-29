@@ -1,8 +1,8 @@
 using System;
 using Pulumi;
 
-namespace AutoDevOps {
-    public class DefaultStack : Stack {
+namespace AutoDevOps.Stack {
+    public class DefaultStack : Pulumi.Stack {
         protected readonly AutoDevOps AutoDevOps;
 
         public DefaultStack() : this(settings => new AutoDevOps(settings)) { }

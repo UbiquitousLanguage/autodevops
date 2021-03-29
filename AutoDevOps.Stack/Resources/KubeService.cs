@@ -4,7 +4,7 @@ using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 
-namespace AutoDevOps.Resources {
+namespace AutoDevOps.Stack.Resources {
     static class KubeService {
         internal static Service Create(
             Output<string>                       namespaceName,

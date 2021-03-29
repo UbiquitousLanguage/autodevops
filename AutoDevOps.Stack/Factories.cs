@@ -3,7 +3,7 @@ using Pulumi;
 using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Networking.V1;
 
-namespace AutoDevOps {
+namespace AutoDevOps.Stack {
     public static class CreateArgs {
         public static InputList<IngressRuleArgs> IngressRule(string hostName, string serviceName, int servicePort, string path = "/")
             => new[] {

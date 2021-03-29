@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using AutoDevOps.Addons;
-using AutoDevOps.Resources;
+using AutoDevOps.Stack.Addons;
+using AutoDevOps.Stack.Resources;
 using Pulumi;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Networking.V1;
@@ -13,7 +13,7 @@ using static System.Environment;
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable InvertIf
 
-namespace AutoDevOps {
+namespace AutoDevOps.Stack {
     public class AutoDevOps {
         public Result DeploymentResult { get; }
 

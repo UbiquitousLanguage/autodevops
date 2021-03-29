@@ -7,7 +7,7 @@ using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 using Deployment = Pulumi.Kubernetes.Apps.V1.Deployment;
 
-namespace AutoDevOps.Resources {
+namespace AutoDevOps.Stack.Resources {
     static class KubeDeployment {
         internal static Deployment Create(
             Output<string>              namespaceName,

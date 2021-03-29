@@ -3,7 +3,7 @@ using Pulumi;
 // ReSharper disable ClassNeverInstantiated.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-namespace AutoDevOps {
+namespace AutoDevOps.Stack {
     public class AutoDevOpsSettings {
         public AutoDevOpsSettings(Config config) {
             Deploy      = config.RequireObject<DeploySettings>("deploy");

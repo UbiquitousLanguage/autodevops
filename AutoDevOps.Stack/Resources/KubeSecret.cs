@@ -6,7 +6,7 @@ using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 using static System.Environment;
 
-namespace AutoDevOps.Resources {
+namespace AutoDevOps.Stack.Resources {
     static class KubeSecret {
         internal static Secret? CreateAppSecret(
             Output<string>     namespaceName,
