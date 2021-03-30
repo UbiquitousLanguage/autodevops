@@ -84,6 +84,10 @@ namespace AutoDevOps.Commands {
             await appStack.SetJsonConfig("service", deploymentSettings.Service);
             await appStack.SetJsonConfig("ingress", deploymentSettings.Ingress);
             await appStack.SetJsonConfig("prometheus", deploymentSettings.Prometheus);
+            
+            Console.WriteLine("Installing plugins");
+
+            await appStack.Workspace.InstallPluginAsync("kubernetes", "v2.8.4");
 
             Console.WriteLine($"Deploying stack {stack}");
 
