@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Text.Json;
@@ -35,7 +36,11 @@ namespace AutoDevOps.Commands {
         ) {
             Console.WriteLine($"Starting with {stack}");
 
-            var program   = PulumiFn.Create(Deployment.RunAsync<DefaultStack>);
+            var program   = PulumiFn.Create(() => {
+                    var autoDevOps = new DefaultStack();
+                    return new Dictionary<string, object> {{"Urn", autoDevOps.Urn}};
+                }
+            );
             var stackArgs = new InlineProgramArgs(Defaults.ProjectName, stack, program);
 
             using var appStack = await LocalWorkspace.CreateOrSelectStackAsync(stackArgs);
