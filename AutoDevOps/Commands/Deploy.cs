@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AutoDevOps.Stack;
 using Pulumi;
 using Pulumi.Automation;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace AutoDevOps.Commands {
     class Deploy : Command {
@@ -34,6 +37,14 @@ namespace AutoDevOps.Commands {
             string stack, string name, string tier, string track, string version, string image, string tag,
             int    percentage
         ) {
+            var valuesFile = Path.Join(".pulumi", "values.yaml");
+            if (!File.Exists(valuesFile))
+                throw new FileNotFoundException("Mandatory deployment config not found");
+
+            var serializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
             Console.WriteLine($"Starting with {stack}");
 
             var program = PulumiFn.Create(
@@ -43,24 +54,13 @@ namespace AutoDevOps.Commands {
                     var _        = new Stack.AutoDevOps(settings);
                 }
             );
-            var stackArgs = new InlineProgramArgs("dummy", stack, program);
+            var stackArgs = new InlineProgramArgs(Defaults.ProjectName, stack, program);
 
             using var appStack = await LocalWorkspace.CreateOrSelectStackAsync(stackArgs);
 
             Console.WriteLine($"Configuring stack {stack}");
 
-            await appStack.SetConfigValueAsync(
-                "gitlab",
-                new ConfigValue(JsonSerializer.Serialize(Defaults.GitLabSettings))
-            );
-
-            await appStack.SetConfigValueAsync(
-                "registry",
-                new ConfigValue(JsonSerializer.Serialize(Defaults.RegistrySettings), true)
-            );
-
             var appSettings = new AutoDevOpsSettings.AppSettings(name, tier, track, version);
-            await appStack.SetConfigValueAsync("app", new ConfigValue(JsonSerializer.Serialize(appSettings)));
 
             var deploySettings = new AutoDevOpsSettings.DeploySettings(
                 Defaults.EnvVar("KUBE_NAMESPACE"),
@@ -71,7 +71,17 @@ namespace AutoDevOps.Commands {
                 tag,
                 Defaults.GitLabVar("ENVIRONMENT_URL")
             );
-            await appStack.SetConfigValueAsync("deploy", new ConfigValue(JsonSerializer.Serialize(deploySettings)));
+
+            var settingsString     = await File.ReadAllTextAsync(valuesFile);
+            var deploymentSettings = serializer.Deserialize<DeploymentSettings>(settingsString);
+
+            await appStack.SetJsonConfig("gitlab", Defaults.GitLabSettings);
+            await appStack.SetJsonConfig("registry", Defaults.RegistrySettings, true);
+            await appStack.SetJsonConfig("app", appSettings);
+            await appStack.SetJsonConfig("deploy", deploySettings);
+            await appStack.SetJsonConfig("service", deploymentSettings.Service);
+            await appStack.SetJsonConfig("ingress", deploymentSettings.Ingress);
+            await appStack.SetJsonConfig("prometheus", deploymentSettings.Prometheus);
 
             Console.WriteLine($"Deploying stack {stack}");
 
@@ -103,5 +113,10 @@ namespace AutoDevOps.Commands {
     pulumi stack tag set app:url "$CI_ENVIRONMENT_URL"
     pulumi stack tag set app:namespace "$KUBE_NAMESPACE"
 */
+        class DeploymentSettings {
+            public AutoDevOpsSettings.ServiceSettings    Service    { get; init; }
+            public AutoDevOpsSettings.IngressSettings    Ingress    { get; init; }
+            public AutoDevOpsSettings.PrometheusSettings Prometheus { get; init; }
+        }
     }
 }

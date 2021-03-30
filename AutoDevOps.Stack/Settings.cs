@@ -66,13 +66,28 @@ namespace AutoDevOps.Stack {
 
         public record RegistrySettings(string Server, string User, string Password, string Email);
 
-        public record ServiceSettings(bool Enabled, string Type, int ExternalPort);
+        public record ServiceSettings {
+            public bool   Enabled      { get; init; }
+            public string Type         { get; init; }
+            public int    ExternalPort { get; init; }
+        }
 
-        public record TlsSettings(bool Enabled, string? SecretName);
+        public record TlsSettings {
+            public bool    Enabled    { get; init; }
+            public string? SecretName { get; init; }
+        }
 
-        public record IngressSettings(bool Enabled, TlsSettings? Tls, string Class = "nginx");
+        public record IngressSettings {
+            public bool         Enabled { get; init; }
+            public TlsSettings? Tls     { get; init; }
+            public string       Class   { get; init; }
+        }
 
-        public record PrometheusSettings(bool Metrics, string Path = "/metrics", bool Operator = false);
+        public record PrometheusSettings {
+            public bool   Metrics  { get; init; }
+            public string Path     { get; init; }
+            public bool   Operator { get; init; }
+        }
 
         public record EnvVar(string Name, string Value);
     }
