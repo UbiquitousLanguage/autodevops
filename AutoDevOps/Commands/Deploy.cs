@@ -49,16 +49,21 @@ namespace AutoDevOps.Commands {
             
             Console.WriteLine($"Starting with {projectName} {stack}");
 
-            var program = PulumiFn.Create(
-                () => {
-                    var config   = new Config();
-                    var settings = new AutoDevOpsSettings(config);
-                    var _        = new Stack.AutoDevOps(settings);
-                }
-            );
-            var stackArgs = new InlineProgramArgs(projectName, stack, program);
-
-            using var appStack = await LocalWorkspace.CreateOrSelectStackAsync(stackArgs);
+            // var program = PulumiFn.Create(
+            //     () => {
+            //         var config   = new Config();
+            //         var settings = new AutoDevOpsSettings(config);
+            //         var _        = new Stack.AutoDevOps(settings);
+            //     }
+            // );
+            // var stackArgs = new InlineProgramArgs(projectName, stack, program);
+            // using var appStack = await LocalWorkspace.CreateOrSelectStackAsync(stackArgs);
+            using var workspace = await LocalWorkspace.CreateAsync(new LocalWorkspaceOptions
+            {
+                Program         = PulumiFn.Create<DefaultStack>(), // use your existing Pulumi.Stack implementation
+                ProjectSettings = new ProjectSettings(projectName, ProjectRuntimeName.Dotnet)
+            });
+            var appStack = await WorkspaceStack.CreateOrSelectAsync(stack, workspace);
 
             Console.WriteLine($"Configuring stack {stack}");
 
