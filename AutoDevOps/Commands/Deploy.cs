@@ -41,7 +41,7 @@ namespace AutoDevOps.Commands {
                     return new Dictionary<string, object> {{"Urn", autoDevOps.Urn}};
                 }
             );
-            var stackArgs = new InlineProgramArgs(Defaults.ProjectName, stack, program);
+            var stackArgs = new InlineProgramArgs("dummy", stack, program);
 
             using var appStack = await LocalWorkspace.CreateOrSelectStackAsync(stackArgs);
 
