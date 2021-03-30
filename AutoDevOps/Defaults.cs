@@ -17,7 +17,7 @@ namespace AutoDevOps {
                 GetEnvironmentVariable($"CI_{alternative}") ??
                 throw new ArgumentNullException($"Either {var} or {alternative} environment variable must be set");
 
-        public static readonly string ProjectName        = GitLabVar("PROJECT_PATH");
+        public static readonly string ProjectName        = GitLabVar("PROJECT_PATH").Replace("-", "");
         public static readonly string ProjectDescription = GitLabVar("PROJECT_TITLE");
         public static readonly string ProjectWebsite     = GitLabVar("PROJECT_URL");
 
