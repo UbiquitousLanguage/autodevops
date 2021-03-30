@@ -35,7 +35,7 @@ namespace AutoDevOps {
             GitLabVar("REGISTRY"),
             GitLabVar("DEPLOY_USER", "REGISTRY_USER"),
             GitLabVar("DEPLOY_PASSWORD", "REGISTRY_PASSWORD"),
-            GitLabVar("USER_EMAIL")
+            EnvVar("GITLAB_USER_EMAIL")
         );
     }
 }

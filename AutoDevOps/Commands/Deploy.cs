@@ -64,7 +64,12 @@ namespace AutoDevOps.Commands {
             );
             await appStack.SetConfigValueAsync("deploy", new ConfigValue(JsonSerializer.Serialize(deploySettings)));
 
-            return 0;
+            var result = await appStack.UpAsync(new UpOptions {
+                OnStandardOutput = Console.Out.WriteLine,
+                OnStandardError = Console.Error.WriteLine
+            });
+            Console.WriteLine(result.Summary.Message);
+            return result.Summary.Result == UpdateState.Succeeded ? 0 : -1;
         }
         
 /*
