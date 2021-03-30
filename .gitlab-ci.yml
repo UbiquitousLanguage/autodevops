@@ -7,7 +7,29 @@ variables:
   DOTNET_RUNTIME_VERSION: "5.0"
 
 stages:
+  - prebuild
+  - build
   - deploy
+
+version:
+  extends: .version
+  stage: prebuild
+  tags:
+    - docker
+
+warmer:
+  extends: .kanikocache
+  stage: prebuild
+  tags:
+    - docker
+
+build:
+  extends: .kanikobuild
+  tags:
+    - docker
+  stage: build
+  dependencies:
+    - version
 
 deploy:
   stage: deploy
