@@ -36,7 +36,7 @@ namespace AutoDevOps.Commands {
             Console.WriteLine($"Starting with {stack}");
 
             var program   = PulumiFn.Create(Deployment.RunAsync<DefaultStack>);
-            var stackArgs = new InlineProgramArgs(Defaults.ProjectName, Defaults.Environment, program);
+            var stackArgs = new InlineProgramArgs(Defaults.ProjectName, stack, program);
 
             using var appStack = await LocalWorkspace.CreateOrSelectStackAsync(stackArgs);
 
