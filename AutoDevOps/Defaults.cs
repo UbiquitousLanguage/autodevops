@@ -6,9 +6,12 @@ namespace AutoDevOps {
     static class Defaults {
         static string VarName(string var) => $"CI_{var}";
 
-        public static string EnvVar(string var)
-            => GetEnvironmentVariable(var) ??
+        public static string EnvVar(string var) {
+            var val = GetEnvironmentVariable(var);
+            Console.WriteLine($"{var} = {val}");
+            return val ??
                 throw new ArgumentNullException($"Environment variable {var} must be set");
+        }
 
         public static string GitLabVar(string var) => EnvVar(VarName(var));
 

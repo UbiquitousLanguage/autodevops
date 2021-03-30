@@ -45,7 +45,9 @@ namespace AutoDevOps.Commands {
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
-            Console.WriteLine($"Starting with {stack}");
+            var projectName = Defaults.ProjectName;
+            
+            Console.WriteLine($"Starting with {projectName} {stack}");
 
             var program = PulumiFn.Create(
                 () => {
@@ -54,7 +56,7 @@ namespace AutoDevOps.Commands {
                     var _        = new Stack.AutoDevOps(settings);
                 }
             );
-            var stackArgs = new InlineProgramArgs(Defaults.ProjectName, stack, program);
+            var stackArgs = new InlineProgramArgs(projectName, stack, program);
 
             using var appStack = await LocalWorkspace.CreateOrSelectStackAsync(stackArgs);
 
