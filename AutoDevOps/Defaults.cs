@@ -6,12 +6,9 @@ namespace AutoDevOps {
     static class Defaults {
         static string VarName(string var) => $"CI_{var}";
 
-        public static string EnvVar(string var) {
-            var val = GetEnvironmentVariable(var);
-            Console.WriteLine($"{var} = {val}");
-            return val ??
+        public static string EnvVar(string var)
+            => GetEnvironmentVariable(var) ??
                 throw new ArgumentNullException($"Environment variable {var} must be set");
-        }
 
         public static string GitLabVar(string var) => EnvVar(VarName(var));
 
@@ -20,7 +17,7 @@ namespace AutoDevOps {
                 GetEnvironmentVariable($"CI_{alternative}") ??
                 throw new ArgumentNullException($"Either {var} or {alternative} environment variable must be set");
 
-        public static readonly string ProjectName        = GitLabVar("PROJECT_PATH").Replace("-", "");
+        public static readonly string ProjectName        = GitLabVar("PROJECT_PATH").Replace("/", "-");
         public static readonly string ProjectDescription = GitLabVar("PROJECT_TITLE");
         public static readonly string ProjectWebsite     = GitLabVar("PROJECT_URL");
 
