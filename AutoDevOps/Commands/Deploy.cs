@@ -4,6 +4,7 @@ using System.CommandLine.Invocation;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AutoDevOps.Stack;
+using Pulumi;
 using Pulumi.Automation;
 
 namespace AutoDevOps.Commands {
@@ -28,22 +29,23 @@ namespace AutoDevOps.Commands {
             );
         }
 
-        async Task<int> DeployStack(string stack, string name, string tier, string track, string version, string image, string tag, int percentage) {
-            Console.WriteLine($"Deploying {stack}");
+        async Task<int> DeployStack(
+            string stack, string name, string tier, string track, string version, string image, string tag,
+            int    percentage
+        ) {
+            Console.WriteLine($"Starting with {stack}");
 
-            using var workspace = await LocalWorkspace.CreateAsync(
-                new LocalWorkspaceOptions {
-                    Program = PulumiFn.Create<DefaultStack>(),
-                    ProjectSettings = new ProjectSettings(Defaults.ProjectName, ProjectRuntimeName.Dotnet) {
-                        Description = Defaults.ProjectDescription,
-                        Website     = Defaults.ProjectWebsite
-                    }
-                }
+            var program   = PulumiFn.Create(Deployment.RunAsync<DefaultStack>);
+            var stackArgs = new InlineProgramArgs(Defaults.ProjectName, Defaults.Environment, program);
+
+            using var appStack = await LocalWorkspace.CreateOrSelectStackAsync(stackArgs);
+
+            Console.WriteLine($"Configuring stack {stack}");
+            
+            await appStack.SetConfigValueAsync(
+                "gitlab",
+                new ConfigValue(JsonSerializer.Serialize(Defaults.GitLabSettings))
             );
-
-            var appStack = await WorkspaceStack.CreateOrSelectAsync(Defaults.Environment, workspace);
-
-            await appStack.SetConfigValueAsync("gitlab", new ConfigValue(JsonSerializer.Serialize(Defaults.GitLabSettings)));
 
             await appStack.SetConfigValueAsync(
                 "registry",
@@ -63,15 +65,19 @@ namespace AutoDevOps.Commands {
                 Defaults.GitLabVar("ENVIRONMENT_URL")
             );
             await appStack.SetConfigValueAsync("deploy", new ConfigValue(JsonSerializer.Serialize(deploySettings)));
+            
+            Console.WriteLine($"Deploying stack {stack}");
 
-            var result = await appStack.UpAsync(new UpOptions {
-                OnStandardOutput = Console.Out.WriteLine,
-                OnStandardError = Console.Error.WriteLine
-            });
+            var result = await appStack.UpAsync(
+                new UpOptions {
+                    OnStandardOutput = Console.Out.WriteLine,
+                    OnStandardError  = Console.Error.WriteLine
+                }
+            );
             Console.WriteLine(result.Summary.Message);
             return result.Summary.Result == UpdateState.Succeeded ? 0 : -1;
         }
-        
+
 /*
     pulumi config set --path deploy.Image "$image_repository"
     pulumi config set --path deploy.ImageTag "$image_tag"
