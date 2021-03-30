@@ -1,7 +1,33 @@
 image: mcr.microsoft.com/dotnet/sdk:5.0-focal
 
+include:
+  - project: "gitlab/ci-templates"
+    file: "/autodevops-ci.yml"
+
 stages:
+  - prebuild
+  - build
   - deploy
+
+version:
+  extends: .version
+  stage: prebuild
+  tags:
+    - docker
+
+warmer:
+  extends: .kanikocache
+  stage: prebuild
+  tags:
+    - docker
+
+build:
+  extends: .kanikobuild
+  tags:
+    - docker
+  stage: build
+  dependencies:
+    - version
 
 deploy:
   stage: deploy
