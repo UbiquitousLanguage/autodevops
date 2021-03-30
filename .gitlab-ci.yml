@@ -1,7 +1,3 @@
-include:
-  - project: "gitlab/ci-templates"
-    file: "/autodevops-ci.yml"
-
 stages:
   - deploy
 
