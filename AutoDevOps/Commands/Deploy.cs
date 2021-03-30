@@ -36,9 +36,11 @@ namespace AutoDevOps.Commands {
         ) {
             Console.WriteLine($"Starting with {stack}");
 
-            var program   = PulumiFn.Create(() => {
-                    var autoDevOps = new DefaultStack();
-                    return new Dictionary<string, object> {{"Urn", autoDevOps.Urn}};
+            var program = PulumiFn.Create(
+                () => {
+                    var config   = new Config();
+                    var settings = new AutoDevOpsSettings(config);
+                    var _        = new Stack.AutoDevOps(settings);
                 }
             );
             var stackArgs = new InlineProgramArgs("dummy", stack, program);
@@ -46,7 +48,7 @@ namespace AutoDevOps.Commands {
             using var appStack = await LocalWorkspace.CreateOrSelectStackAsync(stackArgs);
 
             Console.WriteLine($"Configuring stack {stack}");
-            
+
             await appStack.SetConfigValueAsync(
                 "gitlab",
                 new ConfigValue(JsonSerializer.Serialize(Defaults.GitLabSettings))
@@ -70,7 +72,7 @@ namespace AutoDevOps.Commands {
                 Defaults.GitLabVar("ENVIRONMENT_URL")
             );
             await appStack.SetConfigValueAsync("deploy", new ConfigValue(JsonSerializer.Serialize(deploySettings)));
-            
+
             Console.WriteLine($"Deploying stack {stack}");
 
             var result = await appStack.UpAsync(
