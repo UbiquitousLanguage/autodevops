@@ -24,7 +24,7 @@ warmer:
     - docker
 
 build:
-  extends: .kanikobuild
+  extends: .dockerbuild
   tags:
     - docker
   stage: build
