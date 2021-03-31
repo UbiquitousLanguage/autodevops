@@ -22,14 +22,7 @@ namespace AutoDevOps.Commands {
             AddOption(new Option<string>("--image", () => Env.ImageRepository, "Image repository"));
             AddOption(new Option<string>("--tag", () => Env.ImageTag, "Image tag"));
             AddOption(new Option<int>("--percentage", () => 100, "Deployment percentage"));
-
-            AddOption(
-                new Option<string>(
-                    "--version",
-                    () => Environment.GetEnvironmentVariable("APPLICATION_VERSION"),
-                    "Application version"
-                )
-            );
+            AddOption(new Option<string>("--version", () => Env.ApplicationVersion, "Application version"));
         }
 
         static async Task<int> DeployStack(
@@ -51,7 +44,7 @@ namespace AutoDevOps.Commands {
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
-            var currentDir  = Directory.GetCurrentDirectory();
+            var currentDir = Directory.GetCurrentDirectory();
 
             Console.WriteLine($"Starting with {name} {stack} in {currentDir}");
 

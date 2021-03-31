@@ -25,6 +25,7 @@ namespace AutoDevOps {
         public static readonly string CommitRefSlug         = EnvVar("CI_COMMIT_REF_SLUG");
         public static readonly string ApplicationRepository = EnvVar("CI_APPLICATION_REPOSITORY");
         public static readonly string ApplicationTag        = EnvVar("CI_APPLICATION_TAG");
+        public static readonly string ApplicationVersion    = EnvVar("APPLICATION_VERSION");
 
         public static readonly string DeployRegistryUser     = DeployUser ?? RegistryUser;
         public static readonly string DeployRegistryPassword = DeployPassword ?? RegistryPassword;
