@@ -39,7 +39,7 @@ nuget:
 
 .auto_devops: &auto_devops |
   [[ "$TRACE" ]] && set -x
-  export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
+  export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE
   export CI_APPLICATION_TAG=$CI_COMMIT_SHA
   export CI_CONTAINER_NAME=ci_job_build_${CI_JOB_ID}
 
@@ -75,7 +75,8 @@ nuget:
       docker image pull --quiet "$image_latest" || \
       echo "No previously cached image found. The docker build will proceed without using a cached image"
 
-    docker build --cache-from "$image_previous" --cache-from "$image_latest" --tag "$image_current" --tag "$image_tagged" --tag "$image_latest" .
+    docker build --cache-from "$image_previous" --cache-from "$image_latest" \
+      --tag "$image_current" --tag "$image_tagged" --tag "$image_latest" .
 
     docker push "$image_current"
     docker push "$image_tagged"
