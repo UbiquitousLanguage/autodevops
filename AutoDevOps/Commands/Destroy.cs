@@ -1,10 +1,10 @@
-using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
 using AutoDevOps.Stack;
 using Pulumi.Automation;
+using static Serilog.Log;
 
 namespace AutoDevOps.Commands {
     class Destroy : Command {
@@ -25,12 +25,12 @@ namespace AutoDevOps.Commands {
             );
             var appStack = await WorkspaceStack.SelectAsync(stack, workspace);
 
-            Console.WriteLine($"Destroying {stack}");
+            Information("Destroying {Stack}", stack);
 
             var result = await appStack.DestroyAsync(
                 new DestroyOptions {
-                    OnStandardOutput = Console.Out.WriteLine,
-                    OnStandardError  = Console.Error.WriteLine
+                    OnStandardOutput = Information,
+                    OnStandardError  = Error
                 }
             );
 

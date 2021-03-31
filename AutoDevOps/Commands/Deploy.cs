@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
 using AutoDevOps.Stack;
-using Pulumi;
 using Pulumi.Automation;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using static Serilog.Log;
 
 namespace AutoDevOps.Commands {
     class Deploy : Command {
@@ -35,18 +31,9 @@ namespace AutoDevOps.Commands {
             string tag,
             int    percentage
         ) {
-            var valuesFile = Path.Join(".pulumi", "values.yaml");
-
-            if (!File.Exists(valuesFile))
-                throw new FileNotFoundException("Mandatory deployment config not found");
-
-            var serializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-
             var currentDir = Directory.GetCurrentDirectory();
 
-            Console.WriteLine($"Starting with {name} {stack} in {currentDir}");
+            Information("Starting with {Name} {Stack} in {CurrentDir}", name, stack, currentDir);
 
             using var workspace = await LocalWorkspace.CreateAsync(
                 new LocalWorkspaceOptions {
@@ -57,12 +44,11 @@ namespace AutoDevOps.Commands {
             );
             var appStack = await WorkspaceStack.CreateOrSelectAsync(stack, workspace);
 
-            Console.WriteLine($"Configuring stack {stack}");
+            Information("Configuring stack {Stack}", stack);
 
             var appSettings = new AutoDevOpsSettings.AppSettings(name, tier, track, version);
 
-            var settingsString     = await File.ReadAllTextAsync(valuesFile);
-            var deploymentSettings = serializer.Deserialize<DeploymentSettings>(settingsString);
+            var deploymentSettings = await Settings.GetDeploymentSettings();
 
             await appStack.SetJsonConfig("gitlab", Settings.GitLabSettings());
             await appStack.SetJsonConfig("registry", Settings.RegistrySettings(), true);
@@ -72,31 +58,25 @@ namespace AutoDevOps.Commands {
             await appStack.SetJsonConfig("ingress", deploymentSettings.Ingress);
             await appStack.SetJsonConfig("prometheus", deploymentSettings.Prometheus);
 
-            Console.WriteLine("Installing plugins");
+            Information("Installing plugins");
 
             await appStack.Workspace.InstallPluginAsync("kubernetes", "v2.8.4");
 
-            Console.WriteLine($"Deploying stack {stack}");
+            Information("Deploying stack {Stack}", stack);
 
             var result = await appStack.UpAsync(
                 new UpOptions {
-                    OnStandardOutput = Console.Out.WriteLine,
-                    OnStandardError  = Console.Error.WriteLine
+                    OnStandardOutput = Information,
+                    OnStandardError  = Error
                 }
             );
-            Console.WriteLine(result.Summary.Message);
+            Information("Deployment result: {Result}", result.Summary.Message);
 
             if (!Env.EnvironmentUrl.IsEmpty()) {
-                Console.WriteLine($"Environment URL: {Env.EnvironmentUrl}");
+                Information("Environment URL: {EnvironmentUrl}", Env.EnvironmentUrl);
             }
-            
+
             return result.Summary.Result == UpdateState.Succeeded ? 0 : -1;
-        }
-        
-        class DeploymentSettings {
-            public AutoDevOpsSettings.ServiceSettings    Service    { get; init; }
-            public AutoDevOpsSettings.IngressSettings    Ingress    { get; init; }
-            public AutoDevOpsSettings.PrometheusSettings Prometheus { get; init; }
         }
     }
 }

@@ -15,9 +15,6 @@ namespace AutoDevOps.Stack {
             Ingress     = config.RequireObject<IngressSettings>("ingress");
             Prometheus  = config.RequireObject<PrometheusSettings>("prometheus");
             Env         = config.GetObject<EnvVar[]>("env");
-
-            Console.WriteLine(Service);
-            Console.WriteLine(Ingress);
         }
 
         public string PulumiName(string resource) => $"{Application.Name}-{resource}";
