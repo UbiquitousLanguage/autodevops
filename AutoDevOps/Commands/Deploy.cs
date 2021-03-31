@@ -85,6 +85,10 @@ namespace AutoDevOps.Commands {
                 }
             );
             Console.WriteLine(result.Summary.Message);
+
+            if (!Env.EnvironmentUrl.IsEmpty()) {
+                Console.WriteLine($"Environment URL: {Env.EnvironmentUrl}");
+            }
             
             return result.Summary.Result == UpdateState.Succeeded ? 0 : -1;
         }

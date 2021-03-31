@@ -12,10 +12,10 @@ namespace AutoDevOps.Commands {
             Handler = CommandHandler.Create<string>(DestroyStack);
         }
 
-        static async Task DestroyStack(string stack) {
+        static async Task<int> DestroyStack(string stack) {
             var projectName = Env.ProjectName;
             var currentDir  = Directory.GetCurrentDirectory();
-            
+
             using var workspace = await LocalWorkspace.CreateAsync(
                 new LocalWorkspaceOptions {
                     Program         = PulumiFn.Create<DefaultStack>(),
@@ -24,10 +24,17 @@ namespace AutoDevOps.Commands {
                 }
             );
             var appStack = await WorkspaceStack.SelectAsync(stack, workspace);
-            
+
             Console.WriteLine($"Destroying {stack}");
-            
-            await appStack.DestroyAsync(new DestroyOptions { OnStandardOutput = Console.WriteLine }); 
+
+            var result = await appStack.DestroyAsync(
+                new DestroyOptions {
+                    OnStandardOutput = Console.Out.WriteLine,
+                    OnStandardError  = Console.Error.WriteLine
+                }
+            );
+
+            return result.Summary.Result == UpdateState.Succeeded ? 0 : -1;
         }
     }
 }
