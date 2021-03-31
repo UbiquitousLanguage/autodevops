@@ -7,8 +7,15 @@ using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 using static System.Environment;
 
 namespace Ubiquitous.AutoDevOps.Stack.Resources {
-    static class KubeSecret {
-        internal static Secret? CreateAppSecret(
+    public static class KubeSecret {
+        /// <summary>
+        /// Create the application secret from CI variables, which are prefixed with K8S_SECRET_
+        /// </summary>
+        /// <param name="namespaceName">Namespace, where the secret should be created</param>
+        /// <param name="settings">AutoDevOps settings</param>
+        /// <param name="providerResource">Optional: customer Kubernetes provider</param>
+        /// <returns></returns>
+        public static Secret? CreateAppSecret(
             Output<string>     namespaceName,
             AutoDevOpsSettings settings,
             ProviderResource?  providerResource = null
@@ -37,20 +44,15 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             return new Secret(
                 secretName,
                 new SecretArgs {
-                    Metadata = new ObjectMetaArgs {
-                        Name      = secretName,
-                        Namespace = namespaceName
-                    },
+                    Metadata   = CreateArgs.GetMeta(secretName, namespaceName),
                     Type       = "opaque",
                     StringData = vars
                 },
-                new CustomResourceOptions {
-                    Provider = providerResource
-                }
+                new CustomResourceOptions {Provider = providerResource}
             );
         }
 
-        internal static Secret CreateRegistrySecret(
+        public static Secret CreateRegistrySecret(
             Output<string>                      @namespace,
             AutoDevOpsSettings.RegistrySettings registrySettings,
             ProviderResource?                   providerResource = null
@@ -66,12 +68,9 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             return new Secret(
                 secretName,
                 new SecretArgs {
-                    Metadata = new ObjectMetaArgs {
-                        Name      = secretName,
-                        Namespace = @namespace
-                    },
-                    Type = "kubernetes.io/dockerconfigjson",
-                    Data = new InputMap<string> {{".dockerconfigjson", content}}
+                    Metadata = CreateArgs.GetMeta(secretName, @namespace),
+                    Type     = "kubernetes.io/dockerconfigjson",
+                    Data     = new InputMap<string> {{".dockerconfigjson", content}}
                 },
                 new CustomResourceOptions {
                     Provider = providerResource

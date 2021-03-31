@@ -14,9 +14,30 @@ using static System.Environment;
 // ReSharper disable InvertIf
 
 namespace Ubiquitous.AutoDevOps.Stack {
+    /// <summary>
+    /// A set of Kubernetes resources, which closely replicate what
+    /// GitLab AutoDevOps deployment produces by the Helm release
+    /// </summary>
     public class AutoDevOps {
+        /// <summary>
+        /// Deployment result, which contains the deployed resources
+        /// </summary>
         public Result DeploymentResult { get; }
 
+        /// <summary>
+        /// The AutoDevOps resource constructor, which takes care of deploying the whole thing
+        /// </summary>
+        /// <param name="settings">AutoDevOps settings, <see cref="AutoDevOpsSettings"/></param>
+        /// <param name="sidecars">Optional: collection of sidecar containers</param>
+        /// <param name="configureContainer">Optional: custom application container configuration</param>
+        /// <param name="configurePod">Optional: custom pod configuration</param>
+        /// <param name="configureDeployment">Optional: custom deployment configuration</param>
+        /// <param name="serviceAnnotations">Optional: service annotations</param>
+        /// <param name="ingressAnnotations">Optional: ingress annotations</param>
+        /// <param name="namespaceAnnotations">Optional: namespace annotations</param>
+        /// <param name="deployExtras">Optional: use this to deploy other resources to the environment namespace,
+        /// before the application is deployed.</param>
+        /// <param name="provider">Optional: custom Kubernetes resource provider</param>
         public AutoDevOps(
             AutoDevOpsSettings          settings,
             IEnumerable<ContainerArgs>? sidecars             = null,
@@ -86,6 +107,9 @@ namespace Ubiquitous.AutoDevOps.Stack {
             };
         }
 
+        /// <summary>
+        /// The deployment result, which contains references to all the deployed resources.
+        /// </summary>
         public class Result {
             public Deployment? Deployment { get; init; }
             public Service?    Service    { get; init; }

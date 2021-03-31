@@ -1,6 +1,8 @@
 using System.Linq;
 using Pulumi;
+using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Core.V1;
+using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 using Pulumi.Kubernetes.Types.Inputs.Networking.V1;
 
 namespace Ubiquitous.AutoDevOps.Stack {
@@ -40,12 +42,24 @@ namespace Ubiquitous.AutoDevOps.Stack {
                 Name = envName, ValueFrom = new EnvVarSourceArgs {FieldRef = new ObjectFieldSelectorArgs {FieldPath = field}}
             };
 
+        /// <summary>
+        /// Get the resource requests or limits as input map
+        /// </summary>
+        /// <param name="cpu">CPU value</param>
+        /// <param name="memory">Memory value</param>
+        /// <returns></returns>
         public static InputMap<string> Resource(string cpu, string memory)
             => new() {
                 {"cpu", cpu},
                 {"memory", memory}
             };
 
+        /// <summary>
+        /// Get an HTTP probe, which can be used for readiness or liveness 
+        /// </summary>
+        /// <param name="path">Probe path</param>
+        /// <param name="port">Probe port</param>
+        /// <returns></returns>
         public static ProbeArgs HttpProbe(string path, int port) => new() {
             HttpGet = new HTTPGetActionArgs {
                 Path   = path,
@@ -53,5 +67,15 @@ namespace Ubiquitous.AutoDevOps.Stack {
                 Scheme = "HTTP"
             }
         };
+
+        public static ObjectMetaArgs GetMeta(
+            string name, Output<string> @namespace, InputMap<string>? annotations = null, InputMap<string>? labels = null
+        )
+            => new() {
+                Name        = name,
+                Namespace   = @namespace,
+                Annotations = annotations ?? new InputMap<string>(),
+                Labels      = labels ?? new InputMap<string>()
+            };
     }
 }

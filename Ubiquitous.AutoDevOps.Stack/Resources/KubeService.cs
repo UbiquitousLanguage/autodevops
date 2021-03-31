@@ -5,8 +5,8 @@ using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 
 namespace Ubiquitous.AutoDevOps.Stack.Resources {
-    static class KubeService {
-        internal static Service Create(
+    public static class KubeService {
+        public static Service Create(
             Output<string>                       namespaceName,
             AutoDevOpsSettings                   settings,
             Pulumi.Kubernetes.Apps.V1.Deployment deployment,
@@ -28,12 +28,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             return new Service(
                 settings.PulumiName("service"),
                 new ServiceArgs {
-                    Metadata = new ObjectMetaArgs {
-                        Name        = settings.FullName(),
-                        Namespace   = namespaceName,
-                        Annotations = serviceAnnotations,
-                        Labels      = serviceLabels
-                    },
+                    Metadata = CreateArgs.GetMeta(settings.FullName(), namespaceName, serviceAnnotations, serviceLabels),
                     Spec = new ServiceSpecArgs {
                         Type = settings.Service.Type,
                         Ports = new[] {
@@ -47,9 +42,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
                         Selector = deployment.Spec.Apply(x => x.Selector.MatchLabels)
                     }
                 },
-                new CustomResourceOptions {
-                    Provider = providerResource
-                }
+                new CustomResourceOptions {Provider = providerResource}
             );
         }
     }

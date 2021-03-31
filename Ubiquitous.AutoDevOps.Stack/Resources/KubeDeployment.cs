@@ -8,8 +8,8 @@ using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 using Deployment = Pulumi.Kubernetes.Apps.V1.Deployment;
 
 namespace Ubiquitous.AutoDevOps.Stack.Resources {
-    static class KubeDeployment {
-        internal static Deployment Create(
+    public static class KubeDeployment {
+        public static Deployment Create(
             Output<string>              namespaceName,
             AutoDevOpsSettings          settings,
             int                         replicas,
@@ -49,19 +49,17 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
                 };
             }
 
-            if (!string.IsNullOrWhiteSpace(settings.Application.ReadinessProbe)) {
-                container.ReadinessProbe = CreateArgs.HttpProbe(
-                    settings.Application.ReadinessProbe,
-                    settings.Application.Port
-                );
-            }
+            container.WhenNotEmptyString(
+                settings.Application.ReadinessProbe,
+                (c, p) => c.ReadinessProbe =
+                    CreateArgs.HttpProbe(p, settings.Application.Port)
+            );
 
-            if (!string.IsNullOrWhiteSpace(settings.Application.LivenessProbe)) {
-                container.LivenessProbe = CreateArgs.HttpProbe(
-                    settings.Application.LivenessProbe,
-                    settings.Application.Port
-                );
-            }
+            container.WhenNotEmptyString(
+                settings.Application.LivenessProbe,
+                (c, p) => c.LivenessProbe =
+                    CreateArgs.HttpProbe(p, settings.Application.Port)
+            );
 
             configureContainer?.Invoke(container);
 
@@ -76,12 +74,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             configurePod?.Invoke(podSpec);
 
             var deployment = new DeploymentArgs {
-                Metadata = new ObjectMetaArgs {
-                    Name        = settings.FullName(),
-                    Labels      = appLabels,
-                    Namespace   = namespaceName,
-                    Annotations = gitLabAnnotations
-                },
+                Metadata = CreateArgs.GetMeta(settings.FullName(), namespaceName, gitLabAnnotations, appLabels),
                 Spec = new DeploymentSpecArgs {
                     Selector = new LabelSelectorArgs {MatchLabels = appLabels},
                     Replicas = replicas,
