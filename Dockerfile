@@ -1,4 +1,5 @@
-﻿ARG PULUMI_VERSION=latest
+﻿# syntax=docker/dockerfile:experimental
+ARG PULUMI_VERSION=latest
 ARG PULUMI_IMAGE=pulumi/pulumi-base
 FROM ${PULUMI_IMAGE}:${PULUMI_VERSION} as pulumi
 
