@@ -6,10 +6,9 @@ stages:
 version:
   image: mcr.microsoft.com/dotnet/sdk:5.0-buster-slim
   stage: prebuild
-  script: |
-    dotnet tool install -g minver-cli
-    export PATH="$PATH:/root/.dotnet/tools
-    set_version
+  script: 
+    - dotnet tool install -g minver-cli
+    - set_version
 
 build:
   image: docker:latest
@@ -42,6 +41,7 @@ nuget:
   export CI_CONTAINER_NAME=ci_job_build_${CI_JOB_ID}
 
   set_version() {
+      export PATH="$PATH:/root/.dotnet/tools
       cd ${1-.}
       echo "export APPLICATION_VERSION=\"$(minver)\"" > version.sh
   }
