@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDevOps.Stack", "AutoDevOps.Stack\AutoDevOps.Stack.csproj", "{869894E2-D339-4472-B5B7-3A421D7C4457}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps.Stack", "Ubiquitous.AutoDevOps.Stack\Ubiquitous.AutoDevOps.Stack.csproj", "{869894E2-D339-4472-B5B7-3A421D7C4457}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDevOps", "AutoDevOps\AutoDevOps.csproj", "{6E9A3390-DE4B-4E0C-839D-E1C078AD23DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps", "Ubiquitous.AutoDevOps\Ubiquitous.AutoDevOps.csproj", "{6E9A3390-DE4B-4E0C-839D-E1C078AD23DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,5 +1,5 @@
 ﻿using System.CommandLine;
-using AutoDevOps.Commands;
+using Ubiquitous.AutoDevOps.Commands;
 using Serilog;
 
 var command = new Root();

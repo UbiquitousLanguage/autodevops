@@ -4,7 +4,7 @@ using Pulumi.Kubernetes.Rbac.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 using Pulumi.Kubernetes.Types.Inputs.Rbac.V1;
 
-namespace AutoDevOps.Stack.Addons {
+namespace Ubiquitous.AutoDevOps.Stack.Addons {
     public class Jaeger {
         public static RoleBinding AddJaeger(
             Namespace kubeNamespace, 

@@ -2,7 +2,7 @@ using static System.Environment;
 
 // ReSharper disable MemberHidesStaticFromOuterClass
 
-namespace AutoDevOps {
+namespace Ubiquitous.AutoDevOps {
     static class Env {
         static string EnvVar(string var) => GetEnvironmentVariable(var);
 

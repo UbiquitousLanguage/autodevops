@@ -5,7 +5,7 @@ using Pulumi.Kubernetes.Networking.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 using Pulumi.Kubernetes.Types.Inputs.Networking.V1;
 
-namespace AutoDevOps.Stack.Resources {
+namespace Ubiquitous.AutoDevOps.Stack.Resources {
     static class KubeIngress {
         internal static Ingress Create(
             Output<string>              namespaceName,

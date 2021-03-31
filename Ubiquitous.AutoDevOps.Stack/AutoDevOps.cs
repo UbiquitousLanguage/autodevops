@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
-using AutoDevOps.Stack.Addons;
-using AutoDevOps.Stack.Resources;
 using Pulumi;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Networking.V1;
 using Pulumi.Kubernetes.Types.Inputs.Apps.V1;
 using Pulumi.Kubernetes.Types.Inputs.Core.V1;
+using Ubiquitous.AutoDevOps.Stack.Addons;
+using Ubiquitous.AutoDevOps.Stack.Resources;
 using Deployment = Pulumi.Kubernetes.Apps.V1.Deployment;
 using static System.Environment;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable InvertIf
 
-namespace AutoDevOps.Stack {
+namespace Ubiquitous.AutoDevOps.Stack {
     public class AutoDevOps {
         public Result DeploymentResult { get; }
 

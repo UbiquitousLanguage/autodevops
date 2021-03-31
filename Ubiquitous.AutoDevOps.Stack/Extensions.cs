@@ -5,7 +5,7 @@ using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using static System.Text.Encoding;
 using Convert = System.Convert;
 
-namespace AutoDevOps.Stack {
+namespace Ubiquitous.AutoDevOps.Stack {
     public static class Extensions {
         public static InputMap<string> AsInputMap(this Dictionary<string, string>? dict) => dict ?? new Dictionary<string, string>();
 

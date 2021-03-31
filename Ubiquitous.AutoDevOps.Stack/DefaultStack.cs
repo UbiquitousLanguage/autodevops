@@ -1,7 +1,7 @@
 using System;
 using Pulumi;
 
-namespace AutoDevOps.Stack {
+namespace Ubiquitous.AutoDevOps.Stack {
     public class DefaultStack : Pulumi.Stack {
         protected readonly AutoDevOps AutoDevOps;
 

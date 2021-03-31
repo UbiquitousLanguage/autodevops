@@ -14,7 +14,7 @@ RUN curl -o - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor 
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 COPY . .
-RUN dotnet publish ./AutoDevOps -c Release -r linux-x64 --no-self-contained -clp:NoSummary -o /app/publish \
+RUN dotnet publish ./Ubiquitous.AutoDevOps -c Release -r linux-x64 --no-self-contained -clp:NoSummary -o /app/publish \
 /p:PublishReadyToRun=true,PublishSingleFile=false
 
 # The runtime container
@@ -48,4 +48,4 @@ ENV PATH "/pulumi/bin:${PATH}"
 
 WORKDIR /app
 COPY --from=build /app/publish .
-CMD ["AutoDevOps"]
+CMD ["Ubiquitous.AutoDevOps"]

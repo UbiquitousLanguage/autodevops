@@ -2,11 +2,11 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
-using AutoDevOps.Stack;
+using Ubiquitous.AutoDevOps.Stack;
 using Pulumi.Automation;
 using static Serilog.Log;
 
-namespace AutoDevOps.Commands {
+namespace Ubiquitous.AutoDevOps.Commands {
     class Destroy : Command {
         public Destroy() : base("destroy", "Destroy the stack") {
             Handler = CommandHandler.Create<string>(DestroyStack);

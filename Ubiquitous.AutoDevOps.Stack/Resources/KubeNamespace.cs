@@ -4,7 +4,7 @@ using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 
-namespace AutoDevOps.Stack.Resources {
+namespace Ubiquitous.AutoDevOps.Stack.Resources {
     static class KubeNamespace {
         internal static Namespace Create(
             string name, Dictionary<string, string>? annotations, ProviderResource? providerResource = null

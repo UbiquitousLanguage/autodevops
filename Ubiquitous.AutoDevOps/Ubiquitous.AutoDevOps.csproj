@@ -15,7 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AutoDevOps.Stack\AutoDevOps.Stack.csproj" />
+      <ProjectReference Include="..\Ubiquitous.AutoDevOps.Stack\Ubiquitous.AutoDevOps.Stack.csproj" />
     </ItemGroup>
 
 </Project>

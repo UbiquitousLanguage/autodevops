@@ -1,6 +1,6 @@
 using System.CommandLine;
 
-namespace AutoDevOps.Commands {
+namespace Ubiquitous.AutoDevOps.Commands {
     public class Root : RootCommand {
         public Root() {
             AddCommand(new Deploy());

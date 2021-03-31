@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using Serilog;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using static AutoDevOps.Env;
-using static AutoDevOps.Stack.AutoDevOpsSettings;
+using static Ubiquitous.AutoDevOps.Env;
+using static Ubiquitous.AutoDevOps.Stack.AutoDevOpsSettings;
 
-namespace AutoDevOps {
+namespace Ubiquitous.AutoDevOps {
     public static class Settings {
         public static GitLabSettings GitLabSettings()
             => new(ProjectName, EnvironmentSlug, Env.Environment, EnvironmentUrl, ProjectVisibility);

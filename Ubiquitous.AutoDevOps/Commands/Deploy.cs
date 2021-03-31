@@ -3,11 +3,11 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
-using AutoDevOps.Stack;
+using Ubiquitous.AutoDevOps.Stack;
 using Pulumi.Automation;
 using static Serilog.Log;
 
-namespace AutoDevOps.Commands {
+namespace Ubiquitous.AutoDevOps.Commands {
     class Deploy : Command {
         public Deploy() : base("deploy", "Deploy (update) the stack") {
             Delegate d = new Func<string, string, string, string, string, string, string, int, Task<int>>(DeployStack);
