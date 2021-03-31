@@ -15,7 +15,7 @@ namespace AutoDevOps.Stack {
             Ingress     = config.RequireObject<IngressSettings>("ingress");
             Prometheus  = config.RequireObject<PrometheusSettings>("prometheus");
             Env         = config.GetObject<EnvVar[]>("env");
-            
+
             Console.WriteLine(Service);
             Console.WriteLine(Ingress);
         }
@@ -24,21 +24,14 @@ namespace AutoDevOps.Stack {
 
         public string FullName() => $"{Application.Name}-{GitLab.EnvName}";
 
-        public EnvVar[]? Env { get; }
-
-        public DeploySettings Deploy { get; }
-
-        public AppSettings Application { get; }
-
-        public GitLabSettings GitLab { get; }
-
-        public RegistrySettings? Registry { get; }
-
-        public ServiceSettings Service { get; }
-
-        public IngressSettings Ingress { get; }
-
-        public PrometheusSettings Prometheus { get; }
+        public EnvVar[]?          Env         { get; }
+        public DeploySettings     Deploy      { get; }
+        public AppSettings        Application { get; }
+        public GitLabSettings     GitLab      { get; }
+        public RegistrySettings?  Registry    { get; }
+        public ServiceSettings    Service     { get; }
+        public IngressSettings    Ingress     { get; }
+        public PrometheusSettings Prometheus  { get; }
 
         public record DeploySettings(
             string Namespace,
@@ -57,7 +50,7 @@ namespace AutoDevOps.Stack {
             string? Version,
             int     Port           = 5000,
             string  ReadinessProbe = "/ping",
-            string  LivenessProbe    = "/health"
+            string  LivenessProbe  = "/health"
         );
 
         public record GitLabSettings(

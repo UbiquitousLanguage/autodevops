@@ -17,7 +17,6 @@ namespace AutoDevOps.Commands {
             Delegate d = new Func<string, string, string, string, string, string, string, int, Task<int>>(DeployStack);
             Handler = CommandHandler.Create(d);
 
-            AddOption(new Option<string>("--name", () => Env.ProjectName, "Application name"));
             AddOption(new Option<string>("--tier", () => "web", "Application tier"));
             AddOption(new Option<string>("--track", () => "stable", "Application track"));
             AddOption(new Option<string>("--image", () => Env.ImageRepository, "Image repository"));
@@ -34,7 +33,13 @@ namespace AutoDevOps.Commands {
         }
 
         static async Task<int> DeployStack(
-            string stack, string name, string tier, string track, string version, string image, string tag,
+            string stack,
+            string name,
+            string tier,
+            string track,
+            string version,
+            string image,
+            string tag,
             int    percentage
         ) {
             var valuesFile = Path.Join(".pulumi", "values.yaml");
@@ -46,10 +51,9 @@ namespace AutoDevOps.Commands {
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
-            var projectName = Env.ProjectName;
             var currentDir  = Directory.GetCurrentDirectory();
 
-            Console.WriteLine($"Starting with {projectName} {stack} in {currentDir}");
+            Console.WriteLine($"Starting with {name} {stack} in {currentDir}");
 
             // var program = PulumiFn.Create(
             //     () => {
@@ -63,7 +67,7 @@ namespace AutoDevOps.Commands {
             using var workspace = await LocalWorkspace.CreateAsync(
                 new LocalWorkspaceOptions {
                     Program         = PulumiFn.Create<DefaultStack>(),
-                    ProjectSettings = new ProjectSettings(projectName, ProjectRuntimeName.Dotnet),
+                    ProjectSettings = new ProjectSettings(name, ProjectRuntimeName.Dotnet),
                     WorkDir         = currentDir
                 }
             );
