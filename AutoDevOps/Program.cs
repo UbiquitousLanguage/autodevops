@@ -2,4 +2,4 @@
 using AutoDevOps.Commands;
 
 var command = new Root();
-await command.InvokeAsync(args);
+return await command.InvokeAsync(args);

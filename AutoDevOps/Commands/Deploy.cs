@@ -48,15 +48,6 @@ namespace AutoDevOps.Commands {
 
             Console.WriteLine($"Starting with {name} {stack} in {currentDir}");
 
-            // var program = PulumiFn.Create(
-            //     () => {
-            //         var config   = new Config();
-            //         var settings = new AutoDevOpsSettings(config);
-            //         var _        = new Stack.AutoDevOps(settings);
-            //     }
-            // );
-            // var stackArgs = new InlineProgramArgs(projectName, stack, program);
-            // using var appStack = await LocalWorkspace.CreateOrSelectStackAsync(stackArgs);
             using var workspace = await LocalWorkspace.CreateAsync(
                 new LocalWorkspaceOptions {
                     Program         = PulumiFn.Create<DefaultStack>(),
@@ -94,27 +85,10 @@ namespace AutoDevOps.Commands {
                 }
             );
             Console.WriteLine(result.Summary.Message);
+            
             return result.Summary.Result == UpdateState.Succeeded ? 0 : -1;
         }
-
-/*
-    pulumi config set --path deploy.Image "$image_repository"
-    pulumi config set --path deploy.ImageTag "$image_tag"
-    pulumi config set --path deploy.Percentage "$percentage"
-    pulumi config set --path deploy.Release "$CI_ENVIRONMENT_NAME"
-    pulumi config set --path deploy.Namespace "$KUBE_NAMESPACE"
-    pulumi config set --path deploy.Url "$CI_ENVIRONMENT_URL"
-
-    # pulumi config set --path service.CommonName "le-$CI_PROJECT_ID.$KUBE_INGRESS_BASE_DOMAIN"
-    # pulumi config set --path service.Url "$CI_ENVIRONMENT_URL"
-
-    pulumi up -y -f -r
-
-    pulumi stack tag set app:version "$APPLICATION_VERSION"
-    pulumi stack tag set app:image "$image_repository:$image_tag"
-    pulumi stack tag set app:url "$CI_ENVIRONMENT_URL"
-    pulumi stack tag set app:namespace "$KUBE_NAMESPACE"
-*/
+        
         class DeploymentSettings {
             public AutoDevOpsSettings.ServiceSettings    Service    { get; init; }
             public AutoDevOpsSettings.IngressSettings    Ingress    { get; init; }
