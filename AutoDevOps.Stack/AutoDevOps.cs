@@ -44,7 +44,6 @@ namespace AutoDevOps.Stack {
                 return;
             }
 
-            var stableTrack = settings.Application.Track == "stable";
             var appSecret   = KubeSecret.CreateAppSecret(namespaceName, settings, provider);
 
             var deployment = KubeDeployment.Create(
@@ -60,11 +59,11 @@ namespace AutoDevOps.Stack {
                 provider
             );
 
-            var service = settings.Service.Enabled && stableTrack
+            var service = settings.Service.Enabled
                 ? KubeService.Create(namespaceName, settings, deployment, serviceAnnotations, provider)
                 : null;
 
-            var ingress = settings.Ingress.Enabled && stableTrack
+            var ingress = settings.Ingress.Enabled && !settings.Deploy.Url.IsEmpty()
                 ? KubeIngress.Create(namespaceName, settings, settings.Ingress.Class, ingressAnnotations, provider)
                 : null;
 

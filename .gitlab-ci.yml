@@ -31,8 +31,9 @@ build:
   dependencies:
     - version
 
-deploy:
+nuget:
   stage: deploy
+  image: mcr.microsoft.com/dotnet/sdk:5.0-buster-slim
   script:
     - dotnet pack -c Release -o $PWD/nuget
     - dotnet nuget add source "$CI_SERVER_URL/api/v4/projects/$CI_PROJECT_ID/packages/nuget/index.json" --name gitlab --username gitlab-ci-token --password $CI_JOB_TOKEN --store-password-in-clear-text
