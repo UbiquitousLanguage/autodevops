@@ -11,14 +11,11 @@ version:
     - set_version
 
 build:
-  image: docker:19.03.12
-  services:
-    - docker:19.03.12-dind
+  image: docker:latest
   variables:
     DOCKER_DRIVER: overlay2
   script:
     - use_version
-    - setup_docker
     - docker_build
   stage: build
   dependencies:
@@ -40,14 +37,6 @@ nuget:
   export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
   export CI_APPLICATION_TAG=$CI_COMMIT_SHA
   export CI_CONTAINER_NAME=ci_job_build_${CI_JOB_ID}
-
-  function setup_docker() {
-    if ! docker info &>/dev/null; then
-      if [ -z "$DOCKER_HOST" -a "$KUBERNETES_PORT" ]; then
-        export DOCKER_HOST='tcp://localhost:2375'
-      fi
-    fi
-  }
 
   set_version() {
       cd ${1-.}
