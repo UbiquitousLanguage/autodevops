@@ -16,7 +16,7 @@ namespace AutoDevOps.Commands {
             AddOption(new Option<string>("--tier", () => "web", "Application tier"));
             AddOption(new Option<string>("--track", () => "stable", "Application track"));
             AddOption(new Option<string>("--image", () => Env.ImageRepository, "Image repository"));
-            AddOption(new Option<string>("--tag", () => Env.ImageTag, "Image tag"));
+            AddOption(new Option<string>("--tag", Settings.GetImageTag, "Image tag"));
             AddOption(new Option<int>("--percentage", () => 100, "Deployment percentage"));
             AddOption(new Option<string>("--version", () => Env.ApplicationVersion, "Application version"));
         }

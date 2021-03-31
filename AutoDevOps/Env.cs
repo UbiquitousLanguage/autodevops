@@ -1,4 +1,3 @@
-using System;
 using static System.Environment;
 
 // ReSharper disable MemberHidesStaticFromOuterClass
@@ -6,6 +5,8 @@ using static System.Environment;
 namespace AutoDevOps {
     static class Env {
         static string EnvVar(string var) => GetEnvironmentVariable(var);
+
+        public const string AppVersionVar = "APPLICATION_VERSION";
 
         public static readonly string ProjectName           = EnvVar("CI_PROJECT_PATH_SLUG");
         public static readonly string Environment           = EnvVar("CI_ENVIRONMENT_NAME");
@@ -25,7 +26,7 @@ namespace AutoDevOps {
         public static readonly string CommitRefSlug         = EnvVar("CI_COMMIT_REF_SLUG");
         public static readonly string ApplicationRepository = EnvVar("CI_APPLICATION_REPOSITORY");
         public static readonly string ApplicationTag        = EnvVar("CI_APPLICATION_TAG");
-        public static readonly string ApplicationVersion    = EnvVar("APPLICATION_VERSION");
+        public static readonly string ApplicationVersion    = EnvVar(AppVersionVar);
 
         public static readonly string DeployRegistryUser     = DeployUser ?? RegistryUser;
         public static readonly string DeployRegistryPassword = DeployPassword ?? RegistryPassword;
@@ -33,6 +34,6 @@ namespace AutoDevOps {
         public static readonly string ImageRepository = ApplicationRepository ??
             (CommitTag != null ? RegistryImage : $"{RegistryImage}/{CommitRefSlug}");
 
-        public static readonly string ImageTag = ApplicationTag ?? CommitTag ?? CommitSha;
+        public static string ImageTag() => ApplicationVersion ?? ApplicationTag ?? CommitTag ?? CommitSha;
     }
 }
