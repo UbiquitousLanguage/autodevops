@@ -26,10 +26,12 @@ namespace Ubiquitous.AutoDevOps.Stack {
             Dictionary<string, string>? serviceAnnotations   = null,
             Dictionary<string, string>? ingressAnnotations   = null,
             Dictionary<string, string>? namespaceAnnotations = null,
+            Action<Namespace>?          deployExtras         = null,
             ProviderResource?           provider             = null
         ) {
             var @namespace    = KubeNamespace.Create(settings.Deploy.Namespace, namespaceAnnotations, provider);
             var namespaceName = @namespace.Metadata.Apply(x => x.Name);
+            deployExtras?.Invoke(@namespace);
 
             var imagePullSecret = settings.GitLab.Visibility != "public" && settings.Registry != null
                 ? KubeSecret.CreateRegistrySecret(namespaceName, settings.Registry, provider)
@@ -40,11 +42,11 @@ namespace Ubiquitous.AutoDevOps.Stack {
                 : settings.Deploy.Replicas;
 
             if (replicas == 0) {
-                DeploymentResult = new Result { Namespace = @namespace };
+                DeploymentResult = new Result {Namespace = @namespace};
                 return;
             }
 
-            var appSecret   = KubeSecret.CreateAppSecret(namespaceName, settings, provider);
+            var appSecret = KubeSecret.CreateAppSecret(namespaceName, settings, provider);
 
             var deployment = KubeDeployment.Create(
                 namespaceName,
