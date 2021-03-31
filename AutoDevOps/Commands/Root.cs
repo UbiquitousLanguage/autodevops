@@ -5,7 +5,7 @@ namespace AutoDevOps.Commands {
         public Root() {
             AddCommand(new Deploy());
             AddCommand(new Destroy());
-            AddGlobalOption(new Option<string>("--stack", () => Defaults.GitLabVar("CI_ENVIRONMENT_NAME"), "Stack name"));
+            AddGlobalOption(new Option<string>("--stack", () => Env.Environment, "Stack name"));
         }
     }
 }

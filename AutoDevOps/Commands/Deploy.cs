@@ -17,11 +17,11 @@ namespace AutoDevOps.Commands {
             Delegate d = new Func<string, string, string, string, string, string, string, int, Task<int>>(DeployStack);
             Handler = CommandHandler.Create(d);
 
-            AddOption(new Option<string>("--name", () => Defaults.GitLabVar("PROJECT_NAME"), "Application name"));
+            AddOption(new Option<string>("--name", () => Env.ProjectName, "Application name"));
             AddOption(new Option<string>("--tier", () => "web", "Application tier"));
             AddOption(new Option<string>("--track", () => "stable", "Application track"));
-            AddOption(new Option<string>("--image", "Image repository"));
-            AddOption(new Option<string>("--tag", "Image tag"));
+            AddOption(new Option<string>("--image", () => Env.ImageRepository, "Image repository"));
+            AddOption(new Option<string>("--tag", () => Env.ImageTag, "Image tag"));
             AddOption(new Option<int>("--percentage", () => 100, "Deployment percentage"));
 
             AddOption(
@@ -33,11 +33,12 @@ namespace AutoDevOps.Commands {
             );
         }
 
-        async Task<int> DeployStack(
+        static async Task<int> DeployStack(
             string stack, string name, string tier, string track, string version, string image, string tag,
             int    percentage
         ) {
             var valuesFile = Path.Join(".pulumi", "values.yaml");
+
             if (!File.Exists(valuesFile))
                 throw new FileNotFoundException("Mandatory deployment config not found");
 
@@ -45,9 +46,10 @@ namespace AutoDevOps.Commands {
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
-            var projectName = Defaults.ProjectName;
-            
-            Console.WriteLine($"Starting with {projectName} {stack}");
+            var projectName = Env.ProjectName;
+            var currentDir  = Directory.GetCurrentDirectory();
+
+            Console.WriteLine($"Starting with {projectName} {stack} in {currentDir}");
 
             // var program = PulumiFn.Create(
             //     () => {
@@ -58,38 +60,30 @@ namespace AutoDevOps.Commands {
             // );
             // var stackArgs = new InlineProgramArgs(projectName, stack, program);
             // using var appStack = await LocalWorkspace.CreateOrSelectStackAsync(stackArgs);
-            using var workspace = await LocalWorkspace.CreateAsync(new LocalWorkspaceOptions
-            {
-                Program         = PulumiFn.Create<DefaultStack>(), // use your existing Pulumi.Stack implementation
-                ProjectSettings = new ProjectSettings(projectName, ProjectRuntimeName.Dotnet)
-            });
+            using var workspace = await LocalWorkspace.CreateAsync(
+                new LocalWorkspaceOptions {
+                    Program         = PulumiFn.Create<DefaultStack>(),
+                    ProjectSettings = new ProjectSettings(projectName, ProjectRuntimeName.Dotnet),
+                    WorkDir         = currentDir
+                }
+            );
             var appStack = await WorkspaceStack.CreateOrSelectAsync(stack, workspace);
 
             Console.WriteLine($"Configuring stack {stack}");
 
             var appSettings = new AutoDevOpsSettings.AppSettings(name, tier, track, version);
 
-            var deploySettings = new AutoDevOpsSettings.DeploySettings(
-                Defaults.EnvVar("KUBE_NAMESPACE"),
-                Defaults.GitLabVar("ENVIRONMENT_NAME"),
-                1,
-                percentage,
-                image,
-                tag,
-                Defaults.GitLabVar("ENVIRONMENT_URL")
-            );
-
             var settingsString     = await File.ReadAllTextAsync(valuesFile);
             var deploymentSettings = serializer.Deserialize<DeploymentSettings>(settingsString);
 
-            await appStack.SetJsonConfig("gitlab", Defaults.GitLabSettings);
-            await appStack.SetJsonConfig("registry", Defaults.RegistrySettings, true);
+            await appStack.SetJsonConfig("gitlab", Settings.GitLabSettings());
+            await appStack.SetJsonConfig("registry", Settings.RegistrySettings(), true);
             await appStack.SetJsonConfig("app", appSettings);
-            await appStack.SetJsonConfig("deploy", deploySettings);
+            await appStack.SetJsonConfig("deploy", Settings.DeploySettings(image, tag, percentage));
             await appStack.SetJsonConfig("service", deploymentSettings.Service);
             await appStack.SetJsonConfig("ingress", deploymentSettings.Ingress);
             await appStack.SetJsonConfig("prometheus", deploymentSettings.Prometheus);
-            
+
             Console.WriteLine("Installing plugins");
 
             await appStack.Workspace.InstallPluginAsync("kubernetes", "v2.8.4");
