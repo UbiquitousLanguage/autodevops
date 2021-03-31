@@ -34,6 +34,6 @@ namespace AutoDevOps {
         public static readonly string ImageRepository = ApplicationRepository ??
             (CommitTag != null ? RegistryImage : $"{RegistryImage}/{CommitRefSlug}");
 
-        public static string ImageTag() => ApplicationVersion ?? ApplicationTag ?? CommitTag ?? CommitSha;
+        public static string ImageTag() => ApplicationTag ?? CommitTag ?? CommitSha;
     }
 }

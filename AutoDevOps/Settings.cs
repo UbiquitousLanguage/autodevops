@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Serilog;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using static AutoDevOps.Env;
@@ -43,16 +44,23 @@ namespace AutoDevOps {
 
         public static string GetImageTag() {
             const string versionFileName = "version.sh";
-            if (!File.Exists(versionFileName)) return ImageTag();
+
+            var tag = ImageTag();
+            if (!File.Exists(versionFileName)) {
+                Log.Information("Version artefact not found, using the default tag {Tag}", tag);
+                return tag;
+            }
 
             var versionFile = File.ReadAllText(versionFileName);
             var variable    = versionFile.Replace("export", "", StringComparison.InvariantCultureIgnoreCase).Trim();
+            Log.Debug("Application version: {Version}", variable);
             var split       = variable.Split('=');
 
-            if (split[0] == AppVersionVar)
-                System.Environment.SetEnvironmentVariable(AppVersionVar, split[1].Replace("\"", ""));
+            if (split[0] == AppVersionVar) tag = split[1].Replace("\"", "");
 
-            return ImageTag();
+            Log.Information("Version artefact found, using the tag {Tag}", tag);
+            
+            return tag;
         }
     }
 
