@@ -41,7 +41,7 @@ nuget:
   export CI_CONTAINER_NAME=ci_job_build_${CI_JOB_ID}
 
   set_version() {
-      export PATH="$PATH:/root/.dotnet/tools
+      export PATH="$PATH:/root/.dotnet/tools"
       cd ${1-.}
       echo "export APPLICATION_VERSION=\"$(minver)\"" > version.sh
   }
@@ -72,8 +72,7 @@ nuget:
       docker image pull --quiet "$image_latest" || \
       echo "No previously cached image found. The docker build will proceed without using a cached image"
 
-    docker build --cache-from "$image_previous" --cache-from "$image_latest" \
-      --tag "$image_current" --tag "$image_tagged" --tag "$image_latest" .
+    docker build --cache-from "$image_previous" --cache-from "$image_latest" --tag "$image_current" --tag "$image_tagged" --tag "$image_latest" .
 
     docker push "$image_current"
     docker push "$image_tagged"
