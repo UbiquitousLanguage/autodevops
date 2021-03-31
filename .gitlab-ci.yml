@@ -13,7 +13,7 @@ version:
 build:
   image: docker:latest
   services:
-    - docker:latest-dind
+    - docker:dind
   variables:
     DOCKER_DRIVER: overlay2
   script:
