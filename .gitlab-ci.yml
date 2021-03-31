@@ -9,6 +9,9 @@ version:
   script: 
     - dotnet tool install -g minver-cli
     - set_version
+  artifacts:
+    paths:
+      - version.sh
 
 build:
   image: docker:latest
