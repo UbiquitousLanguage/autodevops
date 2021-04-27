@@ -15,7 +15,7 @@ namespace Ubiquitous.AutoDevOps.Commands {
 
             AddOption(new Option<string>("--tier", () => "web", "Application tier"));
             AddOption(new Option<string>("--track", () => "stable", "Application track"));
-            AddOption(new Option<string>("--image", () => Env.ImageRepository, "Image repository"));
+            AddOption(new Option<string>("--image", Settings.GetImageRegistry, "Image registry"));
             AddOption(new Option<string>("--tag", Settings.GetImageTag, "Image tag"));
             AddOption(new Option<int>("--percentage", () => 100, "Deployment percentage"));
             AddOption(new Option<string>("--version", () => Env.ApplicationVersion, "Application version"));
@@ -43,6 +43,7 @@ namespace Ubiquitous.AutoDevOps.Commands {
                 }
             );
             var appStack = await WorkspaceStack.CreateOrSelectAsync(stack, workspace);
+            await appStack.RefreshAsync();
 
             Information("Configuring stack {Stack}", stack);
 

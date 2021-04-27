@@ -6,7 +6,8 @@ namespace Ubiquitous.AutoDevOps {
     static class Env {
         static string EnvVar(string var) => GetEnvironmentVariable(var);
 
-        public const string AppVersionVar = "APPLICATION_VERSION";
+        public const string AppVersionVar    = "APPLICATION_VERSION";
+        public const string AppRepositoryVar = "CI_APPLICATION_REPOSITORY";
 
         public static readonly string ProjectName           = EnvVar("CI_PROJECT_PATH_SLUG");
         public static readonly string Environment           = EnvVar("CI_ENVIRONMENT_NAME");
@@ -24,14 +25,14 @@ namespace Ubiquitous.AutoDevOps {
         public static readonly string CommitTag             = EnvVar("CI_COMMIT_TAG");
         public static readonly string CommitSha             = EnvVar("CI_COMMIT_SHA");
         public static readonly string CommitRefSlug         = EnvVar("CI_COMMIT_REF_SLUG");
-        public static readonly string ApplicationRepository = EnvVar("CI_APPLICATION_REPOSITORY");
+        public static readonly string ApplicationRepository = EnvVar(AppRepositoryVar);
         public static readonly string ApplicationTag        = EnvVar("CI_APPLICATION_TAG");
         public static readonly string ApplicationVersion    = EnvVar(AppVersionVar);
 
         public static readonly string DeployRegistryUser     = DeployUser ?? RegistryUser;
         public static readonly string DeployRegistryPassword = DeployPassword ?? RegistryPassword;
 
-        public static readonly string ImageRepository = ApplicationRepository ??
+        public static readonly string ImageRegistry = ApplicationRepository ??
             (CommitTag != null ? RegistryImage : $"{RegistryImage}/{CommitRefSlug}");
 
         public static string ImageTag() => ApplicationTag ?? CommitTag ?? CommitSha;

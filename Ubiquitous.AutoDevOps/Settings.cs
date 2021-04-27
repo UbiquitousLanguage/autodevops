@@ -15,15 +15,14 @@ namespace Ubiquitous.AutoDevOps {
         public static RegistrySettings RegistrySettings()
             => new(Registry, DeployRegistryUser, DeployRegistryPassword, UserEmail);
 
-        public static DeploySettings DeploySettings(string image, string tag, int percentage) {
-            return new(KubeNamespace, Env.Environment, 1, percentage, image, tag, EnvironmentUrl);
-        }
+        public static DeploySettings DeploySettings(string image, string tag, int percentage)
+            => new(KubeNamespace, Env.Environment, 1, percentage, image, tag, EnvironmentUrl);
 
         public static async Task<DeploymentSettings> GetDeploymentSettings() {
             var valuesFile = Path.Join(".pulumi", "values.yaml");
 
             if (!File.Exists(valuesFile)) {
-                Serilog.Log.Information("Using default deployment settings");
+                Log.Information("Using default deployment settings");
 
                 return new DeploymentSettings {
                     Ingress    = new IngressSettings {Enabled    = false},
@@ -32,7 +31,7 @@ namespace Ubiquitous.AutoDevOps {
                 };
             }
 
-            Serilog.Log.Information("Using custom deployment settings from {ValuesFile}", valuesFile);
+            Log.Information("Using custom deployment settings from {ValuesFile}", valuesFile);
 
             var serializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -42,25 +41,29 @@ namespace Ubiquitous.AutoDevOps {
             return serializer.Deserialize<DeploymentSettings>(settingsString);
         }
 
-        public static string GetImageTag() {
-            const string versionFileName = "version.sh";
+        public static string GetImageTag()
+            => ParseShFile("version.sh", "Application version", AppVersionVar, ImageTag());
 
-            var tag = ImageTag();
-            if (!File.Exists(versionFileName)) {
-                Log.Information("Version artefact not found, using the default tag {Tag}", tag);
-                return tag;
+        public static string GetImageRegistry()
+            => ParseShFile("docker-image.sh", "Image registry", AppRepositoryVar, ImageRegistry);
+
+        static string ParseShFile(string fileName, string whatIsIt, string expectedVar, string defaultValue) {
+            var value = defaultValue;
+            if (!File.Exists(fileName)) {
+                Log.Information("{What} artefact not found, using the default tag {Tag}", whatIsIt, defaultValue);
+                return defaultValue;
             }
 
-            var versionFile = File.ReadAllText(versionFileName);
+            var versionFile = File.ReadAllText(fileName);
             var variable    = versionFile.Replace("export", "", StringComparison.InvariantCultureIgnoreCase).Trim();
-            Log.Debug("Application version: {Version}", variable);
-            var split       = variable.Split('=');
+            Log.Debug("{What}: {Version}", whatIsIt, variable);
+            var split = variable.Split('=');
 
-            if (split[0] == AppVersionVar) tag = split[1].Replace("\"", "");
+            if (split[0] == expectedVar) value = split[1].Replace("\"", "");
 
-            Log.Information("Version artefact found, using the tag {Tag}", tag);
-            
-            return tag;
+            Log.Information("{What} artefact found, using {Tag}", whatIsIt, value);
+
+            return value;
         }
     }
 
