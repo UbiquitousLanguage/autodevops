@@ -6,11 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MinVer" Version="2.4.0">
+    <PackageReference Include="MinVer" Version="2.5.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Pulumi.Kubernetes" Version="2.*" />
+    <PackageReference Include="Pulumi.Kubernetes" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

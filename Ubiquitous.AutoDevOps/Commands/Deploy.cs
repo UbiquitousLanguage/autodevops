@@ -61,7 +61,7 @@ namespace Ubiquitous.AutoDevOps.Commands {
 
             Information("Installing plugins");
 
-            await appStack.Workspace.InstallPluginAsync("kubernetes", "v2.8.4");
+            await appStack.Workspace.InstallPluginAsync("kubernetes", "v3.0.0");
 
             Information("Deploying stack {Stack}", stack);
 
