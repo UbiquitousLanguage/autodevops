@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Pulumi;
 using Pulumi.Kubernetes.Core.V1;
@@ -7,7 +9,9 @@ using Pulumi.Kubernetes.Types.Inputs.Networking.V1;
 
 namespace Ubiquitous.AutoDevOps.Stack {
     public static class CreateArgs {
-        public static InputList<IngressRuleArgs> IngressRule(string hostName, string serviceName, int servicePort, string path = "/")
+        public static InputList<IngressRuleArgs> IngressRule(
+            string hostName, string serviceName, int servicePort, string path = "/"
+        )
             => new[] {
                 new IngressRuleArgs {
                     Host = hostName,
@@ -20,7 +24,7 @@ namespace Ubiquitous.AutoDevOps.Stack {
         public static HTTPIngressPathArgs HttpIngressPath(string serviceName, int servicePort, string path)
             => new() {
                 PathType = "Prefix",
-                Path = path,
+                Path     = path,
                 Backend = new IngressBackendArgs {
                     Service = new IngressServiceBackendArgs {
                         Name = serviceName,
@@ -39,7 +43,8 @@ namespace Ubiquitous.AutoDevOps.Stack {
 
         public static EnvVarArgs FieldFrom(string envName, string field)
             => new() {
-                Name = envName, ValueFrom = new EnvVarSourceArgs {FieldRef = new ObjectFieldSelectorArgs {FieldPath = field}}
+                Name      = envName,
+                ValueFrom = new EnvVarSourceArgs {FieldRef = new ObjectFieldSelectorArgs {FieldPath = field}}
             };
 
         /// <summary>
@@ -69,7 +74,8 @@ namespace Ubiquitous.AutoDevOps.Stack {
         };
 
         public static ObjectMetaArgs GetMeta(
-            string name, Output<string> @namespace, InputMap<string>? annotations = null, InputMap<string>? labels = null
+            string            name, Output<string> @namespace, InputMap<string>? annotations = null,
+            InputMap<string>? labels = null
         )
             => new() {
                 Name        = name,
@@ -77,5 +83,51 @@ namespace Ubiquitous.AutoDevOps.Stack {
                 Annotations = annotations ?? new InputMap<string>(),
                 Labels      = labels ?? new InputMap<string>()
             };
+
+        public static List<ContainerArgs> GetAppContainers(
+            AutoDevOpsSettings          settings,
+            Secret?                     appSecret          = null,
+            IEnumerable<ContainerArgs>? sidecars           = null,
+            Action<ContainerArgs>?      configureContainer = null
+        ) {
+            var container = new ContainerArgs {
+                Name            = settings.Application.Name,
+                Image           = $"{settings.Deploy.Image}:{settings.Deploy.ImageTag}",
+                ImagePullPolicy = "IfNotPresent",
+                Env = new[] {
+                    EnvVar("ASPNETCORE_ENVIRONMENT", settings.GitLab.EnvName),
+                    EnvVar("GITLAB_ENVIRONMENT_NAME", settings.GitLab.EnvName),
+                    EnvVar("GITLAB_ENVIRONMENT_URL", settings.Deploy.Url)
+                },
+                Ports = new[] {
+                    new ContainerPortArgs {Name = "web", ContainerPortValue = settings.Application.Port}
+                }
+            };
+
+            if (appSecret != null) {
+                container.EnvFrom = new EnvFromSourceArgs {
+                    SecretRef = new SecretEnvSourceArgs {Name = appSecret.Metadata.Apply(x => x.Name)}
+                };
+            }
+
+            container.WhenNotEmptyString(
+                settings.Application.ReadinessProbe,
+                (c, p) => c.ReadinessProbe =
+                    HttpProbe(p, settings.Application.Port)
+            );
+
+            container.WhenNotEmptyString(
+                settings.Application.LivenessProbe,
+                (c, p) => c.LivenessProbe =
+                    HttpProbe(p, settings.Application.Port)
+            );
+
+            configureContainer?.Invoke(container);
+
+            var containers = new List<ContainerArgs> {container};
+            if (sidecars != null) containers.AddRange(sidecars);
+
+            return containers;
+        }
     }
 }

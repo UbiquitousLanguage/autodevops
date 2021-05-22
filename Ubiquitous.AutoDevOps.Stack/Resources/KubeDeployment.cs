@@ -29,42 +29,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
 
             var gitLabAnnotations = settings.GitLabAnnotations();
 
-            var container = new ContainerArgs {
-                Name            = settings.Application.Name,
-                Image           = $"{settings.Deploy.Image}:{settings.Deploy.ImageTag}",
-                ImagePullPolicy = "IfNotPresent",
-                Env = new[] {
-                    CreateArgs.EnvVar("ASPNETCORE_ENVIRONMENT", settings.GitLab.EnvName),
-                    CreateArgs.EnvVar("GITLAB_ENVIRONMENT_NAME", settings.GitLab.EnvName),
-                    CreateArgs.EnvVar("GITLAB_ENVIRONMENT_URL", settings.Deploy.Url)
-                },
-                Ports = new[] {
-                    new ContainerPortArgs {Name = "web", ContainerPortValue = settings.Application.Port}
-                }
-            };
-
-            if (appSecret != null) {
-                container.EnvFrom = new EnvFromSourceArgs {
-                    SecretRef = new SecretEnvSourceArgs {Name = appSecret.Metadata.Apply(x => x.Name)}
-                };
-            }
-
-            container.WhenNotEmptyString(
-                settings.Application.ReadinessProbe,
-                (c, p) => c.ReadinessProbe =
-                    CreateArgs.HttpProbe(p, settings.Application.Port)
-            );
-
-            container.WhenNotEmptyString(
-                settings.Application.LivenessProbe,
-                (c, p) => c.LivenessProbe =
-                    CreateArgs.HttpProbe(p, settings.Application.Port)
-            );
-
-            configureContainer?.Invoke(container);
-
-            var containers = new List<ContainerArgs> {container};
-            if (sidecars != null) containers.AddRange(sidecars);
+            var containers = CreateArgs.GetAppContainers(settings, appSecret, sidecars, configureContainer);
 
             var podSpec = new PodSpecArgs {
                 ImagePullSecrets = CreateArgs.ImagePullSecrets(imagePullSecret?.Metadata.Apply(x => x.Name)),

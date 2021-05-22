@@ -132,7 +132,7 @@ namespace Ubiquitous.AutoDevOps.Stack {
             var envSlug    = GetEnvironmentVariable("CI_ENVIRONMENT_SLUG")?.ToUpper();
             var replicas   = GetEnvironmentVariable("REPLICAS");
 
-            var envVar = track == "stable" || track == "rollout"
+            var envVar = track is "stable" or "rollout"
                 ? $"{envSlug}_REPLICAS"
                 : $"{envTrack}_{envSlug}_REPLICAS";
             var envReplicas = GetEnvironmentVariable(envVar);
