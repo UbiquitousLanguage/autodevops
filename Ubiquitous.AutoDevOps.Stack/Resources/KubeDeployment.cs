@@ -21,36 +21,24 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             Action<DeploymentArgs>?     configureDeployment = null,
             ProviderResource?           providerResource    = null
         ) {
-            var appLabels = settings
-                .BaseLabels()
-                .AddPair("track", settings.Application.Track)
-                .AddPair("tier", settings.Application.Tier)
-                .AddPair("version", settings.Application.Version);
-
+            var appLabels         = settings.AppLabels();
             var gitLabAnnotations = settings.GitLabAnnotations();
-
-            var containers = CreateArgs.GetAppContainers(settings, appSecret, sidecars, configureContainer);
-
-            var podSpec = new PodSpecArgs {
-                ImagePullSecrets = CreateArgs.ImagePullSecrets(imagePullSecret?.Metadata.Apply(x => x.Name)),
-                Containers = containers,
-                TerminationGracePeriodSeconds = 60
-            };
-            configurePod?.Invoke(podSpec);
+            var containers        = CreateArgs.GetAppContainers(settings, appSecret, sidecars, configureContainer);
 
             var deployment = new DeploymentArgs {
                 Metadata = CreateArgs.GetMeta(settings.FullName(), namespaceName, gitLabAnnotations, appLabels),
                 Spec = new DeploymentSpecArgs {
                     Selector = new LabelSelectorArgs {MatchLabels = appLabels},
                     Replicas = replicas,
-                    Template = new PodTemplateSpecArgs {
-                        Metadata = new ObjectMetaArgs {
-                            Labels      = appLabels,
-                            Annotations = gitLabAnnotations,
-                            Namespace   = namespaceName
-                        },
-                        Spec = podSpec
-                    }
+                    Template = CreateArgs.GetPodTemplate(
+                        namespaceName,
+                        containers,
+                        imagePullSecret,
+                        appLabels,
+                        gitLabAnnotations,
+                        60,
+                        configurePod
+                    )
                 }
             };
             configureDeployment?.Invoke(deployment);

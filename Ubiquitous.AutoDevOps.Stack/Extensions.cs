@@ -34,6 +34,15 @@ namespace Ubiquitous.AutoDevOps.Stack {
                 {"release", settings.Deploy.Release}
             };
 
+        public static InputMap<string> AppLabels(this AutoDevOpsSettings settings)
+            => new() {
+                {"app", settings.Application.Name},
+                {"release", settings.Deploy.Release},
+                {"track", settings.Application.Track},
+                {"tier", settings.Application.Tier},
+                {"version", settings.Application.Version ?? ""}
+            };
+
         /// <summary>
         /// Gets the default GitLab annotations for the deployment, which are needed to
         /// show the environment in the GitLab UI

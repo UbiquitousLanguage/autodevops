@@ -129,5 +129,31 @@ namespace Ubiquitous.AutoDevOps.Stack {
 
             return containers;
         }
+
+        public static PodTemplateSpecArgs GetPodTemplate(
+            Output<string>       namespaceName,
+            List<ContainerArgs>  containers,
+            Secret?              imagePullSecret,
+            InputMap<string>     labels,
+            InputMap<string>     annotations,
+            int                  terminationGracePeriod = 60,
+            Action<PodSpecArgs>? configurePod           = null
+        ) {
+            var podSpec = new PodSpecArgs {
+                ImagePullSecrets              = ImagePullSecrets(imagePullSecret?.Metadata.Apply(x => x.Name)),
+                Containers                    = containers,
+                TerminationGracePeriodSeconds = terminationGracePeriod
+            };
+            configurePod?.Invoke(podSpec);
+
+            return new PodTemplateSpecArgs {
+                Metadata = new ObjectMetaArgs {
+                    Labels      = labels,
+                    Annotations = annotations,
+                    Namespace   = namespaceName
+                },
+                Spec = podSpec
+            };
+        }
     }
 }
