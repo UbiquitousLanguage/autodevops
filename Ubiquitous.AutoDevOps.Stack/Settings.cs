@@ -62,7 +62,7 @@ namespace Ubiquitous.AutoDevOps.Stack {
 
         public record ServiceSettings {
             public bool   Enabled      { get; init; }
-            public string Type         { get; init; }
+            public string Type         { get; init; } = "ClusterIP";
             public int    ExternalPort { get; init; }
         }
 

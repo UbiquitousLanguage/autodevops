@@ -32,8 +32,8 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             }
 
             if (settings.Env != null) {
-                foreach (var envVar in settings.Env) {
-                    vars[envVar.Name] = envVar.Value;
+                foreach (var (name, value) in settings.Env) {
+                    vars[name] = value;
                 }
             }
 

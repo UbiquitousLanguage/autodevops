@@ -32,6 +32,7 @@ namespace Ubiquitous.AutoDevOps.Stack {
         /// <param name="configureContainer">Optional: custom application container configuration</param>
         /// <param name="configurePod">Optional: custom pod configuration</param>
         /// <param name="configureDeployment">Optional: custom deployment configuration</param>
+        /// <param name="configureService">Optional: custom service configuration</param>
         /// <param name="serviceAnnotations">Optional: service annotations</param>
         /// <param name="ingressAnnotations">Optional: ingress annotations</param>
         /// <param name="namespaceAnnotations">Optional: namespace annotations</param>
@@ -44,6 +45,7 @@ namespace Ubiquitous.AutoDevOps.Stack {
             Action<ContainerArgs>?      configureContainer   = null,
             Action<PodSpecArgs>?        configurePod         = null,
             Action<DeploymentArgs>?     configureDeployment  = null,
+            Action<ServiceArgs>?        configureService     = null,
             Dictionary<string, string>? serviceAnnotations   = null,
             Dictionary<string, string>? ingressAnnotations   = null,
             Dictionary<string, string>? namespaceAnnotations = null,
@@ -83,7 +85,14 @@ namespace Ubiquitous.AutoDevOps.Stack {
             );
 
             var service = settings.Service.Enabled
-                ? KubeService.Create(namespaceName, settings, deployment, serviceAnnotations, provider)
+                ? KubeService.Create(
+                    namespaceName,
+                    settings,
+                    deployment,
+                    serviceAnnotations,
+                    configureService,
+                    provider
+                )
                 : null;
 
             var ingress = settings.Ingress.Enabled && !settings.Deploy.Url.IsEmpty()

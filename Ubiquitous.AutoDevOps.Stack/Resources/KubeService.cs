@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Pulumi;
 using Pulumi.Kubernetes.Core.V1;
@@ -10,8 +11,33 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             Output<string>                       namespaceName,
             AutoDevOpsSettings                   settings,
             Pulumi.Kubernetes.Apps.V1.Deployment deployment,
-            Dictionary<string, string>?          annotations,
+            Dictionary<string, string>?          annotations      = null,
+            Action<ServiceArgs>?                 configureService = null,
             ProviderResource?                    providerResource = null
+        ) {
+            var selector = deployment.Spec.Apply(x => x.Selector.MatchLabels);
+            return Create(namespaceName, settings, selector, annotations, configureService, providerResource);
+        }
+
+        public static Service Create(
+            Output<string>                        namespaceName,
+            AutoDevOpsSettings                    settings,
+            Pulumi.Kubernetes.Apps.V1.StatefulSet statefulSet,
+            Dictionary<string, string>?           annotations      = null,
+            Action<ServiceArgs>?                  configureService = null,
+            ProviderResource?                     providerResource = null
+        ) {
+            var selector = statefulSet.Spec.Apply(x => x.Selector.MatchLabels);
+            return Create(namespaceName, settings, selector, annotations, configureService, providerResource);
+        }
+
+        static Service Create(
+            Output<string>              namespaceName,
+            AutoDevOpsSettings          settings,
+            InputMap<string>            selector,
+            Dictionary<string, string>? annotations      = null,
+            Action<ServiceArgs>?        configureService = null,
+            ProviderResource?           providerResource = null
         ) {
             var serviceLabels = settings.BaseLabels();
 
@@ -25,23 +51,28 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
                     .AddPair("prometheus.io/port", settings.Service.ExternalPort.ToString());
             }
 
-            return new Service(
-                settings.PulumiName("service"),
+            var serviceArgs =
                 new ServiceArgs {
-                    Metadata = CreateArgs.GetMeta(settings.FullName(), namespaceName, serviceAnnotations, serviceLabels),
+                    Metadata =
+                        CreateArgs.GetMeta(settings.FullName(), namespaceName, serviceAnnotations, serviceLabels),
                     Spec = new ServiceSpecArgs {
                         Type = settings.Service.Type,
-                        Ports = new[] {
-                            new ServicePortArgs {
+                        Ports = new List<ServicePortArgs> {
+                            new() {
                                 Name       = "web",
                                 Port       = settings.Service.ExternalPort,
                                 TargetPort = settings.Application.Port,
                                 Protocol   = "TCP"
                             }
                         },
-                        Selector = deployment.Spec.Apply(x => x.Selector.MatchLabels)
+                        Selector = selector
                     }
-                },
+                };
+            configureService?.Invoke(serviceArgs);
+
+            return new Service(
+                settings.PulumiName("service"),
+                serviceArgs,
                 new CustomResourceOptions {Provider = providerResource}
             );
         }

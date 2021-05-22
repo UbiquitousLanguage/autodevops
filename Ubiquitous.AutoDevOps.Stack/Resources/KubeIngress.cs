@@ -11,7 +11,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             Output<string>              namespaceName,
             AutoDevOpsSettings          settings,
             string                      ingressClass,
-            Dictionary<string, string>? annotations,
+            Dictionary<string, string>? annotations      = null,
             ProviderResource?           providerResource = null
         ) {
             var ingressLabels = settings.BaseLabels();
