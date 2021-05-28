@@ -1,4 +1,3 @@
-using System;
 using Pulumi;
 
 // ReSharper disable ClassNeverInstantiated.Global

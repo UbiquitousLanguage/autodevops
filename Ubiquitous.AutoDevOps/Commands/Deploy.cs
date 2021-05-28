@@ -35,13 +35,18 @@ namespace Ubiquitous.AutoDevOps.Commands {
 
             Information("Starting with {Name} {Stack} in {CurrentDir}", name, stack, currentDir);
 
-            using var workspace = await LocalWorkspace.CreateAsync(
-                new LocalWorkspaceOptions {
-                    Program         = PulumiFn.Create<DefaultStack>(),
-                    ProjectSettings = new ProjectSettings(name, ProjectRuntimeName.Dotnet),
-                    WorkDir         = currentDir
-                }
-            );
+            var customStackPath  = Path.Combine(currentDir, "deploy");
+            var usingCustomStack = Directory.Exists(customStackPath);
+
+            if (usingCustomStack)
+                Information("Using the custom stack in {Directory}", customStackPath);
+            
+            LocalWorkspaceOptions stackArgs = usingCustomStack
+                ? new LocalProgramArgs(stack, customStackPath)
+                : new InlineProgramArgs(name, stack, PulumiFn.Create<DefaultStack>());
+
+            using var workspace = await LocalWorkspace.CreateAsync(stackArgs);
+
             var appStack = await WorkspaceStack.CreateOrSelectAsync(stack, workspace);
             await appStack.RefreshAsync();
 
@@ -61,7 +66,7 @@ namespace Ubiquitous.AutoDevOps.Commands {
 
             Information("Installing plugins");
 
-            await appStack.Workspace.InstallPluginAsync("kubernetes", "v3.0.0");
+            await appStack.Workspace.InstallPluginAsync("kubernetes", "v3.3.0");
 
             Information("Deploying stack {Stack}", stack);
 
