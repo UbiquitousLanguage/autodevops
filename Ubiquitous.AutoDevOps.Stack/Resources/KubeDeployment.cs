@@ -23,7 +23,15 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
         ) {
             var appLabels         = settings.AppLabels();
             var gitLabAnnotations = settings.GitLabAnnotations();
-            var containers        = CreateArgs.GetAppContainers(settings, appSecret, sidecars, configureContainer);
+
+            var containers = CreateArgs.GetAppContainers(
+                settings.Application,
+                settings.Deploy,
+                settings.GitLab,
+                appSecret,
+                sidecars,
+                configureContainer
+            );
 
             var deployment = new DeploymentArgs {
                 Metadata = CreateArgs.GetMeta(settings.FullName(), namespaceName, gitLabAnnotations, appLabels),

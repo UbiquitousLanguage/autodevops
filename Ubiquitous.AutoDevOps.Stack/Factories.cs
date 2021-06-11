@@ -85,22 +85,24 @@ namespace Ubiquitous.AutoDevOps.Stack {
             };
 
         public static List<ContainerArgs> GetAppContainers(
-            AutoDevOpsSettings          settings,
-            Secret?                     appSecret          = null,
-            IEnumerable<ContainerArgs>? sidecars           = null,
-            Action<ContainerArgs>?      configureContainer = null
+            AutoDevOpsSettings.AppSettings    appSettings,
+            AutoDevOpsSettings.DeploySettings deploySettings,
+            AutoDevOpsSettings.GitLabSettings gitLabSettings,
+            Secret?                           appSecret          = null,
+            IEnumerable<ContainerArgs>?       sidecars           = null,
+            Action<ContainerArgs>?            configureContainer = null
         ) {
             var container = new ContainerArgs {
-                Name            = settings.Application.Name,
-                Image           = settings.Deploy.Image,
+                Name            = appSettings.Name,
+                Image           = deploySettings.Image,
                 ImagePullPolicy = "IfNotPresent",
                 Env = new[] {
-                    EnvVar("ASPNETCORE_ENVIRONMENT", settings.GitLab.EnvName),
-                    EnvVar("GITLAB_ENVIRONMENT_NAME", settings.GitLab.EnvName),
-                    EnvVar("GITLAB_ENVIRONMENT_URL", settings.Deploy.Url)
+                    EnvVar("ASPNETCORE_ENVIRONMENT", gitLabSettings.EnvName),
+                    EnvVar("GITLAB_ENVIRONMENT_NAME", gitLabSettings.EnvName),
+                    EnvVar("GITLAB_ENVIRONMENT_URL", deploySettings.Url)
                 },
                 Ports = new[] {
-                    new ContainerPortArgs {Name = "web", ContainerPortValue = settings.Application.Port}
+                    new ContainerPortArgs {Name = "web", ContainerPortValue = appSettings.Port}
                 }
             };
 
@@ -111,15 +113,15 @@ namespace Ubiquitous.AutoDevOps.Stack {
             }
 
             container.WhenNotEmptyString(
-                settings.Application.ReadinessProbe,
+                appSettings.ReadinessProbe,
                 (c, p) => c.ReadinessProbe =
-                    HttpProbe(p, settings.Application.Port)
+                    HttpProbe(p, appSettings.Port)
             );
 
             container.WhenNotEmptyString(
-                settings.Application.LivenessProbe,
+                appSettings.LivenessProbe,
                 (c, p) => c.LivenessProbe =
-                    HttpProbe(p, settings.Application.Port)
+                    HttpProbe(p, appSettings.Port)
             );
 
             configureContainer?.Invoke(container);
