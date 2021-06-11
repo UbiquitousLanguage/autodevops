@@ -35,7 +35,6 @@ namespace Ubiquitous.AutoDevOps.Stack {
             int    Replicas,
             int    Percentage,
             string Image,
-            string ImageTag,
             string Url
         );
 

@@ -15,8 +15,8 @@ namespace Ubiquitous.AutoDevOps {
         public static RegistrySettings RegistrySettings()
             => new(Registry, DeployRegistryUser, DeployRegistryPassword, UserEmail);
 
-        public static DeploySettings DeploySettings(string image, string tag, int percentage)
-            => new(KubeNamespace, Env.Environment, 1, percentage, image, tag, EnvironmentUrl);
+        public static DeploySettings DeploySettings(string image, int percentage)
+            => new(KubeNamespace, Env.Environment, 1, percentage, image, EnvironmentUrl);
 
         public static async Task<DeploymentSettings> GetDeploymentSettings() {
             var valuesFile = Path.Join(".pulumi", "values.yaml");

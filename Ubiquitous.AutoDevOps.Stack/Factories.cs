@@ -92,7 +92,7 @@ namespace Ubiquitous.AutoDevOps.Stack {
         ) {
             var container = new ContainerArgs {
                 Name            = settings.Application.Name,
-                Image           = $"{settings.Deploy.Image}:{settings.Deploy.ImageTag}",
+                Image           = settings.Deploy.Image,
                 ImagePullPolicy = "IfNotPresent",
                 Env = new[] {
                     EnvVar("ASPNETCORE_ENVIRONMENT", settings.GitLab.EnvName),

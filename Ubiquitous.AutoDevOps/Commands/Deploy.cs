@@ -10,13 +10,12 @@ using static Serilog.Log;
 namespace Ubiquitous.AutoDevOps.Commands {
     class Deploy : Command {
         public Deploy() : base("deploy", "Deploy (update) the stack") {
-            Delegate d = new Func<string, string, string, string, string, string, string, int, Task<int>>(DeployStack);
+            Delegate d = new Func<string, string, string, string, string, string, int, Task<int>>(DeployStack);
             Handler = CommandHandler.Create(d);
 
             AddOption(new Option<string>("--tier", () => "web", "Application tier"));
             AddOption(new Option<string>("--track", () => "stable", "Application track"));
             AddOption(new Option<string>("--image", Settings.GetImageRegistry, "Image registry"));
-            AddOption(new Option<string>("--tag", Settings.GetImageTag, "Image tag"));
             AddOption(new Option<int>("--percentage", () => 100, "Deployment percentage"));
             AddOption(new Option<string>("--version", () => Env.ApplicationVersion, "Application version"));
         }
@@ -28,7 +27,6 @@ namespace Ubiquitous.AutoDevOps.Commands {
             string track,
             string version,
             string image,
-            string tag,
             int    percentage
         ) {
             var currentDir = Directory.GetCurrentDirectory();
@@ -59,7 +57,7 @@ namespace Ubiquitous.AutoDevOps.Commands {
             await appStack.SetJsonConfig("gitlab", Settings.GitLabSettings());
             await appStack.SetJsonConfig("registry", Settings.RegistrySettings(), true);
             await appStack.SetJsonConfig("app", appSettings);
-            await appStack.SetJsonConfig("deploy", Settings.DeploySettings(image, tag, percentage));
+            await appStack.SetJsonConfig("deploy", Settings.DeploySettings(image, percentage));
             await appStack.SetJsonConfig("service", deploymentSettings.Service);
             await appStack.SetJsonConfig("ingress", deploymentSettings.Ingress);
             await appStack.SetJsonConfig("prometheus", deploymentSettings.Prometheus);
