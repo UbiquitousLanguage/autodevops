@@ -34,9 +34,9 @@ namespace Ubiquitous.AutoDevOps.Stack {
                 {"release", settings.Deploy.Release}
             };
 
-        public static InputMap<string> AppLabels(this AutoDevOpsSettings settings)
+        public static InputMap<string> AppLabels(this AutoDevOpsSettings settings, string? app = null)
             => new() {
-                {"app", settings.Application.Name},
+                {"app", app ?? settings.Application.Name},
                 {"release", settings.Deploy.Release},
                 {"track", settings.Application.Track},
                 {"tier", settings.Application.Tier},
