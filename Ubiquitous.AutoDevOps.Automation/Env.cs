@@ -3,7 +3,7 @@ using static System.Environment;
 // ReSharper disable MemberHidesStaticFromOuterClass
 
 namespace Ubiquitous.AutoDevOps {
-    static class Env {
+    public static class Env {
         static string EnvVar(string var) => GetEnvironmentVariable(var);
 
         public const string AppVersionVar    = "APPLICATION_VERSION";
