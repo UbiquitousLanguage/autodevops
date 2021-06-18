@@ -7,7 +7,7 @@ using Pulumi.Automation;
 using static Serilog.Log;
 
 namespace Ubiquitous.AutoDevOps.Commands {
-    class Destroy : Command {
+    public class Destroy : Command {
         public Destroy() : base("destroy", "Destroy the stack") {
             Handler = CommandHandler.Create<string>(DestroyStack);
         }

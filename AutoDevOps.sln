@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps.Stack
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps", "Ubiquitous.AutoDevOps\Ubiquitous.AutoDevOps.csproj", "{6E9A3390-DE4B-4E0C-839D-E1C078AD23DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps.Automation", "Ubiquitous.AutoDevOps.Automation\Ubiquitous.AutoDevOps.Automation.csproj", "{EEB17A8E-621C-486F-A7C2-C3E11EA46ABD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{6E9A3390-DE4B-4E0C-839D-E1C078AD23DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E9A3390-DE4B-4E0C-839D-E1C078AD23DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E9A3390-DE4B-4E0C-839D-E1C078AD23DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEB17A8E-621C-486F-A7C2-C3E11EA46ABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEB17A8E-621C-486F-A7C2-C3E11EA46ABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEB17A8E-621C-486F-A7C2-C3E11EA46ABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEB17A8E-621C-486F-A7C2-C3E11EA46ABD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
