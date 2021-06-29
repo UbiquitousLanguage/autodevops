@@ -6,13 +6,15 @@ namespace Ubiquitous.AutoDevOps {
     public static class Env {
         static string EnvVar(string var) => GetEnvironmentVariable(var);
 
-        public const string AppVersionVar    = "APPLICATION_VERSION";
-        public const string AppRepositoryVar = "CI_APPLICATION_REPOSITORY";
+        public const string AppVersionVar      = "APPLICATION_VERSION";
+        public const string AppRepositoryVar   = "CI_APPLICATION_REPOSITORY";
+        public const string EnvironmentSlugVar = "CI_ENVIRONMENT_SLUG";
+        public const string ReplicasVar        = "REPLICAS";
 
         public static readonly string ProjectName           = EnvVar("CI_PROJECT_PATH_SLUG");
         public static readonly string Environment           = EnvVar("CI_ENVIRONMENT_NAME");
         public static readonly string EnvironmentUrl        = EnvVar("CI_ENVIRONMENT_URL");
-        public static readonly string EnvironmentSlug       = EnvVar("CI_ENVIRONMENT_SLUG");
+        public static readonly string EnvironmentSlug       = EnvVar(EnvironmentSlugVar);
         public static readonly string ProjectVisibility     = EnvVar("CI_PROJECT_VISIBILITY");
         public static readonly string Registry              = EnvVar("CI_REGISTRY");
         public static readonly string RegistryUser          = EnvVar("CI_REGISTRY_USER");
@@ -28,6 +30,7 @@ namespace Ubiquitous.AutoDevOps {
         public static readonly string ApplicationRepository = EnvVar(AppRepositoryVar);
         public static readonly string ApplicationTag        = EnvVar("CI_APPLICATION_TAG");
         public static readonly string ApplicationVersion    = EnvVar(AppVersionVar);
+        public static readonly string Replicas              = EnvVar(ReplicasVar);
 
         public static readonly string DeployRegistryUser     = DeployUser ?? RegistryUser;
         public static readonly string DeployRegistryPassword = DeployPassword ?? RegistryPassword;
@@ -36,5 +39,10 @@ namespace Ubiquitous.AutoDevOps {
             (CommitTag != null ? RegistryImage : $"{RegistryImage}/{CommitRefSlug}");
 
         public static string ImageTag() => ApplicationTag ?? CommitTag ?? CommitSha;
+
+        public static string EnvReplicas(string track)
+            => track == "stable"
+                ? EnvVar($"{EnvironmentSlug.ToUpper()}_{ReplicasVar}")
+                : EnvVar($"{track.ToUpper()}_{EnvironmentSlug.ToUpper()}_{ReplicasVar}");
     }
 }

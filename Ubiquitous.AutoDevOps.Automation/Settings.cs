@@ -15,8 +15,15 @@ namespace Ubiquitous.AutoDevOps {
         public static RegistrySettings RegistrySettings()
             => new(Registry, DeployRegistryUser, DeployRegistryPassword, UserEmail);
 
-        public static DeploySettings DeploySettings(string image, int percentage)
-            => new(KubeNamespace, Env.Environment, 1, percentage, image, EnvironmentUrl);
+        public static DeploySettings DeploySettings(string image, int percentage, string track)
+            => new(KubeNamespace, Env.Environment, Replicas(track), percentage, image, EnvironmentUrl);
+
+        static int Replicas(string track) {
+            return int.TryParse(EnvReplicas(track), out var envReplicas) ? Adjust(envReplicas) :
+                int.TryParse(Env.Replicas, out var defaultReplicas)      ? Adjust(defaultReplicas) : 1;
+
+            static int Adjust(int count) => count == 0 ? 1 : count;
+        }
 
         public static async Task<DeploymentSettings> GetDeploymentSettings() {
             var valuesFile = Path.Join(".pulumi", "values.yaml");
@@ -49,6 +56,7 @@ namespace Ubiquitous.AutoDevOps {
 
         static string ParseShFile(string fileName, string whatIsIt, string expectedVar, string defaultValue) {
             var value = defaultValue;
+
             if (!File.Exists(fileName)) {
                 Log.Information("{What} artefact not found, using the default tag {Tag}", whatIsIt, defaultValue);
                 return defaultValue;
