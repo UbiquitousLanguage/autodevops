@@ -32,7 +32,7 @@ namespace Ubiquitous.AutoDevOps {
                 Log.Information("Using default deployment settings");
 
                 return new DeploymentSettings {
-                    Ingress    = new IngressSettings {Enabled    = false},
+                    Ingress    = new IngressSettings {Enabled    = EnvironmentUrl != null},
                     Service    = new ServiceSettings {Enabled    = true, Type = "ClusterIP", ExternalPort = 5000},
                     Prometheus = new PrometheusSettings {Metrics = false}
                 };

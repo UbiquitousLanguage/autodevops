@@ -30,12 +30,12 @@ namespace Ubiquitous.AutoDevOps.Stack {
         public PrometheusSettings Prometheus  { get; }
 
         public record DeploySettings(
-            string Namespace,
-            string Release,
-            int    Replicas,
-            int    Percentage,
-            string Image,
-            string Url
+            string  Namespace,
+            string  Release,
+            int     Replicas,
+            int     Percentage,
+            string  Image,
+            string? Url
         );
 
         public record AppSettings(
