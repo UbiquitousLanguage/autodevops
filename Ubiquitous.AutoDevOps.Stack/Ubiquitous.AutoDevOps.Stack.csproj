@@ -19,4 +19,12 @@
     <None Remove="AutoDevOps.Stack.csproj.DotSettings" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Crds" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ubiquitous.AutoDevOps.Crds.Prometheus\Ubiquitous.AutoDevOps.Crds.Prometheus.csproj" />
+  </ItemGroup>
+
 </Project>

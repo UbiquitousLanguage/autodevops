@@ -27,7 +27,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
                     "location /metrics { deny all; }"
                 );
 
-            var uri = new Uri(settings.Deploy.Url);
+            var uri = new Uri(settings.Deploy.Url!);
 
             var ingress = new IngressArgs {
                 Metadata = CreateArgs.GetMeta(settings.FullName(), namespaceName, ingressAnnotations, ingressLabels),

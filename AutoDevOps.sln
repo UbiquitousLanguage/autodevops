@@ -6,6 +6,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps", "Ub
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps.Automation", "Ubiquitous.AutoDevOps.Automation\Ubiquitous.AutoDevOps.Automation.csproj", "{EEB17A8E-621C-486F-A7C2-C3E11EA46ABD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Crds", "Crds", "{7361312B-72A4-4684-91D3-68D937AD1782}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps.Crds.CertManager", "Ubiquitous.AutoDevOps.Crds.CertManager\Ubiquitous.AutoDevOps.Crds.CertManager.csproj", "{D3DEFDBB-A5AF-43C5-8B18-B18EC46A40DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps.Crds.Prometheus", "Ubiquitous.AutoDevOps.Crds.Prometheus\Ubiquitous.AutoDevOps.Crds.Prometheus.csproj", "{F736A681-7F43-48C8-B12F-1670D176EEC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +30,17 @@ Global
 		{EEB17A8E-621C-486F-A7C2-C3E11EA46ABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEB17A8E-621C-486F-A7C2-C3E11EA46ABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEB17A8E-621C-486F-A7C2-C3E11EA46ABD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3DEFDBB-A5AF-43C5-8B18-B18EC46A40DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3DEFDBB-A5AF-43C5-8B18-B18EC46A40DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3DEFDBB-A5AF-43C5-8B18-B18EC46A40DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3DEFDBB-A5AF-43C5-8B18-B18EC46A40DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F736A681-7F43-48C8-B12F-1670D176EEC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F736A681-7F43-48C8-B12F-1670D176EEC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F736A681-7F43-48C8-B12F-1670D176EEC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F736A681-7F43-48C8-B12F-1670D176EEC9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D3DEFDBB-A5AF-43C5-8B18-B18EC46A40DE} = {7361312B-72A4-4684-91D3-68D937AD1782}
+		{F736A681-7F43-48C8-B12F-1670D176EEC9} = {7361312B-72A4-4684-91D3-68D937AD1782}
 	EndGlobalSection
 EndGlobal

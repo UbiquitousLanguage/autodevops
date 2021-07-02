@@ -95,7 +95,7 @@ namespace Ubiquitous.AutoDevOps.Stack {
                 )
                 : null;
 
-            var ingress = settings.Ingress.Enabled && !settings.Deploy.Url.IsEmpty()
+            var ingress = settings.Ingress.Enabled && !settings.Deploy.Url!.IsEmpty()
                 ? KubeIngress.Create(namespaceName, settings, settings.Ingress.Class, ingressAnnotations, provider)
                 : null;
 

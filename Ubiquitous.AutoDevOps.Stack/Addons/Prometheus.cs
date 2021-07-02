@@ -1,10 +1,12 @@
+using JetBrains.Annotations;
 using Pulumi;
-using Pulumi.Crds.Monitoring.V1;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
-using Pulumi.Kubernetes.Types.Inputs.Monitoring.V1;
+using Ubiquitous.AutoDevOps.Crds.Prometheus.Monitoring.V1;
+using Ubiquitous.AutoDevOps.Crds.Prometheus.Monitoring.V1.Inputs;
 
 namespace Ubiquitous.AutoDevOps.Stack.Addons {
+    [PublicAPI]
     public static class Prometheus {
         public static PodMonitor CreatePodMonitor(
             AutoDevOpsSettings                   settings,
