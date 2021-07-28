@@ -6,26 +6,27 @@ using Pulumi;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
+using static Ubiquitous.AutoDevOps.Stack.AutoDevOpsSettings;
 
 namespace Ubiquitous.AutoDevOps.Stack.Factories {
     [PublicAPI]
     public static class Pods {
         public static List<ContainerArgs> GetAppContainers(
-            AutoDevOpsSettings.AppSettings    appSettings,
-            AutoDevOpsSettings.DeploySettings deploySettings,
-            AutoDevOpsSettings.GitLabSettings gitLabSettings,
-            Secret?                           appSecret          = null,
-            IEnumerable<ContainerArgs>?       sidecars           = null,
-            Action<ContainerArgs>?            configureContainer = null
+            AppSettings                 appSettings,
+            DeploySettings              deploySettings,
+            GitLabSettings              gitLabSettings,
+            Secret?                     appSecret          = null,
+            IEnumerable<ContainerArgs>? sidecars           = null,
+            Action<ContainerArgs>?      configureContainer = null
         ) {
             var container = new ContainerArgs {
-                Name            = appSettings.Name,
+                Name            = deploySettings.ResourceName,
                 Image           = deploySettings.Image,
                 ImagePullPolicy = "IfNotPresent",
                 Env = new[] {
                     EnvVar("ASPNETCORE_ENVIRONMENT", gitLabSettings.EnvName),
                     EnvVar("GITLAB_ENVIRONMENT_NAME", gitLabSettings.EnvName),
-                    EnvVar("GITLAB_ENVIRONMENT_URL", deploySettings.Url)
+                    EnvVar("GITLAB_ENVIRONMENT_URL", deploySettings.Url ?? "")
                 },
                 Ports = new[] {
                     new ContainerPortArgs {Name = "web", ContainerPortValue = appSettings.Port}
@@ -59,7 +60,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Factories {
         }
 
         public static PodTemplateSpecArgs GetPodTemplate(
-            Output<string>       namespaceName,
+            Namespace            kubens,
             List<ContainerArgs>  containers,
             Secret?              imagePullSecret,
             InputMap<string>     labels,
@@ -78,7 +79,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Factories {
                 Metadata = new ObjectMetaArgs {
                     Labels      = labels,
                     Annotations = annotations,
-                    Namespace   = namespaceName
+                    Namespace   = kubens.GetName()
                 },
                 Spec = podSpec
             };
@@ -115,7 +116,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Factories {
                 .Where(x => x != null)
                 .Select(x => new LocalObjectReferenceArgs {Name = x!})
                 .ToArray();
-        
+
         public static EnvVarArgs EnvVar(string name, string value) => new() {Name = name, Value = value};
 
         public static EnvVarArgs FieldFrom(string envName, string field)
@@ -123,7 +124,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Factories {
                 Name      = envName,
                 ValueFrom = new EnvVarSourceArgs {FieldRef = new ObjectFieldSelectorArgs {FieldPath = field}}
             };
-        
+
         /// <summary>
         /// Add a volume to the pod configuration
         /// </summary>
@@ -139,6 +140,5 @@ namespace Ubiquitous.AutoDevOps.Stack.Factories {
 
             return pod;
         }
-
     }
 }

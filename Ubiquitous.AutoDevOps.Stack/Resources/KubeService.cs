@@ -11,7 +11,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
     [PublicAPI]
     public static class KubeService {
         public static Service Create(
-            Output<string>                       namespaceName,
+            Namespace                            kubens,
             AppSettings                          appSettings,
             DeploySettings                       deploySettings,
             ServiceSettings                      serviceSettings,
@@ -25,7 +25,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             var selector = deployment.Spec.Apply(x => x.Selector.MatchLabels);
 
             return Create(
-                namespaceName,
+                kubens,
                 appSettings,
                 deploySettings,
                 serviceSettings,
@@ -39,7 +39,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
         }
 
         public static Service Create(
-            Output<string>                        namespaceName,
+            Namespace                             kubens,
             AppSettings                           appSettings,
             DeploySettings                        deploySettings,
             ServiceSettings                       serviceSettings,
@@ -51,9 +51,9 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             ProviderResource?                     providerResource = null
         ) {
             var selector = statefulSet.Spec.Apply(x => x.Selector.MatchLabels);
-            
+
             return Create(
-                namespaceName,
+                kubens,
                 appSettings,
                 deploySettings,
                 serviceSettings,
@@ -67,7 +67,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
         }
 
         public static Service Create(
-            Output<string>              namespaceName,
+            Namespace                   kubens,
             AppSettings                 appSettings,
             DeploySettings              deploySettings,
             ServiceSettings             serviceSettings,
@@ -78,7 +78,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             Action<ServiceArgs>?        configureService = null,
             ProviderResource?           providerResource = null
         ) {
-            var serviceLabels = Meta.BaseLabels(appSettings, deploySettings);
+            var serviceLabels = deploySettings.BaseLabels();
 
             var serviceAnnotations = (annotations ?? new Dictionary<string, string>())
                 .AsInputMap();
@@ -94,8 +94,8 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
                 new ServiceArgs {
                     Metadata =
                         Meta.GetMeta(
-                            appSettings.Name,
-                            namespaceName,
+                            deploySettings.ResourceName,
+                            kubens.GetName(),
                             serviceAnnotations,
                             serviceLabels
                         ),
@@ -115,7 +115,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             configureService?.Invoke(serviceArgs);
 
             return new Service(
-                appSettings.PulumiName("service"),
+                deploySettings.PulumiName("service"),
                 serviceArgs,
                 new CustomResourceOptions {Provider = providerResource}
             );

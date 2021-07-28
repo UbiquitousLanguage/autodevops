@@ -11,12 +11,12 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
         /// <summary>
         /// Create the application secret from CI variables, which are prefixed with K8S_SECRET_
         /// </summary>
-        /// <param name="namespaceName">Namespace, where the secret should be created</param>
+        /// <param name="namespace">Namespace, where the secret should be created</param>
         /// <param name="settings">AutoDevOps settings</param>
         /// <param name="providerResource">Optional: customer Kubernetes provider</param>
         /// <returns></returns>
         public static Secret? CreateAppSecret(
-            Output<string>     namespaceName,
+            Namespace          @namespace,
             AutoDevOpsSettings settings,
             ProviderResource?  providerResource = null
         ) {
@@ -24,7 +24,9 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
 
             var vars = new Dictionary<string, string>();
 
+#pragma warning disable 8605
             foreach (DictionaryEntry entry in env) {
+#pragma warning restore 8605
                 var key = (string) entry.Key;
 
                 if (key.StartsWith("K8S_SECRET_") && entry.Value != null)
@@ -44,7 +46,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             return new Secret(
                 secretName,
                 new SecretArgs {
-                    Metadata   = Meta.GetMeta(secretName, namespaceName),
+                    Metadata   = Meta.GetMeta(secretName, @namespace.GetName()),
                     Type       = "opaque",
                     StringData = vars
                 },
@@ -60,7 +62,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
         /// <param name="providerResource"></param>
         /// <returns></returns>
         public static Secret CreateRegistrySecret(
-            Output<string>                      @namespace,
+            Namespace                           @namespace,
             AutoDevOpsSettings.RegistrySettings registrySettings,
             ProviderResource?                   providerResource = null
         ) {
@@ -75,7 +77,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             return new Secret(
                 secretName,
                 new SecretArgs {
-                    Metadata = Meta.GetMeta(secretName, @namespace),
+                    Metadata = Meta.GetMeta(secretName, @namespace.GetName()),
                     Type     = "kubernetes.io/dockerconfigjson",
                     Data     = new InputMap<string> {{".dockerconfigjson", content}}
                 },

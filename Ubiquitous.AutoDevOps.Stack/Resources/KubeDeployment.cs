@@ -12,7 +12,7 @@ using Deployment = Pulumi.Kubernetes.Apps.V1.Deployment;
 namespace Ubiquitous.AutoDevOps.Stack.Resources {
     public static class KubeDeployment {
         public static Deployment Create(
-            Output<string>              namespaceName,
+            Namespace                   kubens,
             AppSettings                 appSettings,
             DeploySettings              deploySettings,
             GitLabSettings              gitLabSettings,
@@ -37,12 +37,12 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             );
 
             var deployment = new DeploymentArgs {
-                Metadata = Meta.GetMeta(appSettings.Name, namespaceName, gitLabAnnotations, appLabels),
+                Metadata = Meta.GetMeta(appSettings.Name, kubens.GetName(), gitLabAnnotations, appLabels),
                 Spec = new DeploymentSpecArgs {
                     Selector = new LabelSelectorArgs {MatchLabels = appLabels},
                     Replicas = deploySettings.Replicas,
                     Template = Pods.GetPodTemplate(
-                        namespaceName,
+                        kubens,
                         containers,
                         imagePullSecret,
                         appLabels,
@@ -55,7 +55,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             configureDeployment?.Invoke(deployment);
 
             return new Deployment(
-                appSettings.PulumiName("deployment"),
+                deploySettings.PulumiName("deployment"),
                 deployment,
                 new CustomResourceOptions {Provider = providerResource}
             );

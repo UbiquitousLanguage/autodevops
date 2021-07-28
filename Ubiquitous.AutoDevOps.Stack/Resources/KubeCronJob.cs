@@ -15,10 +15,10 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
     [PublicAPI]
     public class KubeCronJob {
         public static CronJob Create(
+            Namespace              kubens,
             AppSettings            appSettings,
             DeploySettings         jobSettings,
             GitLabSettings         gitLabSettings,
-            Output<string>         namespaceName,
             string                 schedule,
             Secret                 imagePullSecret,
             Secret?                appSecret,
@@ -41,7 +41,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             );
 
             var podTemplate = Pods.GetPodTemplate(
-                namespaceName,
+                kubens,
                 containers,
                 imagePullSecret,
                 appLabels,
@@ -53,9 +53,9 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             );
 
             return new CronJob(
-                appSettings.PulumiName("job"),
+                jobSettings.PulumiName("job"),
                 new CronJobArgs {
-                    Metadata = Meta.GetMeta(appSettings.Name, namespaceName, gitLabAnnotations, appLabels),
+                    Metadata = Meta.GetMeta(appSettings.Name, kubens.GetName(), gitLabAnnotations, appLabels),
                     Spec = new CronJobSpecArgs {
                         Schedule          = schedule,
                         ConcurrencyPolicy = "Forbid",

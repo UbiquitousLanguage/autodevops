@@ -53,11 +53,10 @@ namespace Ubiquitous.AutoDevOps.Stack {
             ProviderResource?           provider             = null
         ) {
             var @namespace    = KubeNamespace.Create(settings.Deploy.Namespace, namespaceAnnotations, provider);
-            var namespaceName = @namespace.Metadata.Apply(x => x.Name);
             deployExtras?.Invoke(@namespace);
 
             var imagePullSecret = settings.GitLab.Visibility != "public" && settings.Registry != null
-                ? KubeSecret.CreateRegistrySecret(namespaceName, settings.Registry, provider)
+                ? KubeSecret.CreateRegistrySecret(@namespace, settings.Registry, provider)
                 : null;
 
             var replicas = settings.Deploy.Percentage > 0 || settings.Deploy.Replicas == 0
@@ -69,10 +68,10 @@ namespace Ubiquitous.AutoDevOps.Stack {
                 return;
             }
 
-            var appSecret = KubeSecret.CreateAppSecret(namespaceName, settings, provider);
+            var appSecret = KubeSecret.CreateAppSecret(@namespace, settings, provider);
 
             var deployment = KubeDeployment.Create(
-                namespaceName,
+                @namespace,
                 settings.Application,
                 settings.Deploy with {Replicas = replicas},
                 settings.GitLab,
@@ -87,7 +86,7 @@ namespace Ubiquitous.AutoDevOps.Stack {
 
             var service = settings.Service.Enabled
                 ? KubeService.Create(
-                    namespaceName,
+                    @namespace,
                     settings.Application,
                     settings.Deploy,
                     settings.Service,
@@ -102,8 +101,7 @@ namespace Ubiquitous.AutoDevOps.Stack {
 
             var ingress = settings.Ingress.Enabled && !settings.Deploy.Url!.IsEmpty() && service != null
                 ? KubeIngress.Create(
-                    namespaceName,
-                    settings.Application,
+                    @namespace,
                     settings.Deploy,
                     settings.Ingress,
                     service,
@@ -115,10 +113,10 @@ namespace Ubiquitous.AutoDevOps.Stack {
 
             if (settings.Prometheus.Metrics && settings.Prometheus.Operator) {
                 if (service != null) {
-                    Prometheus.CreateServiceMonitor(settings.Application, settings.Prometheus, service, @namespace, provider);
+                    Prometheus.CreateServiceMonitor(settings.Deploy, settings.Prometheus, service, @namespace, provider);
                 }
                 else {
-                    Prometheus.CreatePodMonitor(settings.Application, deployment, @namespace, provider);
+                    Prometheus.CreatePodMonitor(settings.Deploy, deployment, @namespace, provider);
                 }
             }
 

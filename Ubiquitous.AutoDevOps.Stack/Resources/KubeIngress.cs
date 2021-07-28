@@ -10,8 +10,7 @@ using Ingress = Pulumi.Kubernetes.Networking.V1.Ingress;
 namespace Ubiquitous.AutoDevOps.Stack.Resources {
     public static class KubeIngress {
         public static Ingress Create(
-            Output<string>              namespaceName,
-            AppSettings                 appSettings,
+            Namespace                   kubens,
             DeploySettings              deploySettings,
             IngressSettings             ingressSettings,
             Service                     service,
@@ -19,7 +18,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             Dictionary<string, string>? annotations      = null,
             ProviderResource?           providerResource = null
         ) {
-            var ingressLabels = Meta.BaseLabels(appSettings, deploySettings);
+            var ingressLabels = deploySettings.BaseLabels();
             var tlsEnabled    = ingressSettings.Tls?.Enabled == true;
 
             var ingressAnnotations = (annotations ?? new Dictionary<string, string>())
@@ -35,7 +34,12 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             var uri = new Uri(deploySettings.Url!);
 
             var ingress = new IngressArgs {
-                Metadata = Meta.GetMeta(appSettings.Name, namespaceName, ingressAnnotations, ingressLabels),
+                Metadata = Meta.GetMeta(
+                    deploySettings.ResourceName,
+                    kubens.GetName(),
+                    ingressAnnotations,
+                    ingressLabels
+                ),
                 Spec = new IngressSpecArgs {
                     Rules = Factories.Ingress.IngressRule(
                         uri.Host,
@@ -45,7 +49,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
                     Tls = tlsEnabled
                         ? new[] {
                             new IngressTLSArgs {
-                                SecretName = ingressSettings.Tls!.SecretName ?? $"{appSettings.Name}-tls",
+                                SecretName = ingressSettings.Tls!.SecretName ?? $"{deploySettings.ResourceName}-tls",
                                 Hosts      = new[] {uri.Host}
                             }
                         }
@@ -54,7 +58,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             };
 
             return new Ingress(
-                appSettings.PulumiName("ingress"),
+                deploySettings.PulumiName("ingress"),
                 ingress,
                 new CustomResourceOptions {Provider = providerResource}
             );
