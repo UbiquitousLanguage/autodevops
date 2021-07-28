@@ -24,7 +24,7 @@ namespace Ubiquitous.AutoDevOps.Commands {
                     return await stackDeployment.DeployStack(configuration, options);
                 }
                 catch (Exception e) {
-                    Log.Error("Deployment failed: {Message}", e.Message);
+                    Log.Error(e, "Deployment failed: {Message}", e.Message);
                     return -1;
                 }
             }
