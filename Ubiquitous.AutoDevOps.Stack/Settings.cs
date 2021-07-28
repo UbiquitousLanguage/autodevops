@@ -26,6 +26,12 @@ namespace Ubiquitous.AutoDevOps.Stack {
         public IngressSettings    Ingress     { get; }
         public PrometheusSettings Prometheus  { get; }
 
+        public enum DeploymentKind {
+            Deployment,
+            StatefulSet
+        }
+
+        [PublicAPI]
         public record DeploySettings(
             string  ResourceName,
             string  Namespace,
@@ -35,7 +41,9 @@ namespace Ubiquitous.AutoDevOps.Stack {
             string  Image,
             string? Url
         ) {
-            public string ImagePullPolicy { get; init; } = "IfNotPresent";
+            public string         ImagePullPolicy    { get; init; } = "IfNotPresent";
+            public DeploymentKind Kind               { get; init; } = DeploymentKind.Deployment;
+            public string?        StatefulSetService { get; init; }
         }
 
         public record AppSettings(
@@ -45,8 +53,8 @@ namespace Ubiquitous.AutoDevOps.Stack {
             string? Version,
             int     Port           = 5000,
             string? PortName       = "web",
-            string  ReadinessProbe = "/ping",
-            string  LivenessProbe  = "/health"
+            string? ReadinessProbe = "/ping",
+            string? LivenessProbe  = "/health"
         );
 
         public record GitLabSettings(
@@ -58,10 +66,13 @@ namespace Ubiquitous.AutoDevOps.Stack {
 
         public record RegistrySettings(string Server, string User, string Password, string Email);
 
+        [PublicAPI]
         public record ServiceSettings {
             public bool   Enabled      { get; init; }
             public string Type         { get; init; } = "ClusterIP";
             public int    ExternalPort { get; init; }
+            public string PortName     { get; init; } = "web";
+            public string Protocol     { get; init; } = "TCP";
         }
 
         public record TlsSettings {

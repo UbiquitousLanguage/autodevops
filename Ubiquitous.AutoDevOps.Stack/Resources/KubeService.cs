@@ -103,10 +103,10 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
                         Type = serviceSettings.Type,
                         Ports = new List<ServicePortArgs> {
                             new() {
-                                Name       = "web",
+                                Name       = serviceSettings.PortName,
                                 Port       = serviceSettings.ExternalPort,
                                 TargetPort = appSettings.Port,
-                                Protocol   = "TCP"
+                                Protocol   = serviceSettings.Protocol
                             }
                         },
                         Selector = selector

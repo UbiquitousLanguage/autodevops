@@ -39,8 +39,8 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
                 configureContainer
             );
 
-            var deployment = new StatefulSetArgs {
-                Metadata = Meta.GetMeta(appSettings.Name, kubens.GetName(), gitLabAnnotations, appLabels),
+            var statefulSetArgs = new StatefulSetArgs {
+                Metadata = Meta.GetMeta(deploySettings.ResourceName, kubens.GetName(), gitLabAnnotations, appLabels),
                 Spec = new StatefulSetSpecArgs {
                     Selector = new LabelSelectorArgs {MatchLabels = appLabels},
                     Replicas = deploySettings.Replicas,
@@ -52,14 +52,15 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
                         gitLabAnnotations,
                         60,
                         configurePod
-                    )
+                    ),
+                    ServiceName = deploySettings.StatefulSetService
                 }
             };
-            configureStatefulSet?.Invoke(deployment);
+            configureStatefulSet?.Invoke(statefulSetArgs);
 
             return new StatefulSet(
                 deploySettings.PulumiName("statefulSet"),
-                deployment,
+                statefulSetArgs,
                 new CustomResourceOptions {Provider = providerResource}
             );
         }

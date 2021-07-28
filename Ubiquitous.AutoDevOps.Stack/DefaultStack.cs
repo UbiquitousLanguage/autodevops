@@ -1,10 +1,12 @@
 using System;
+using JetBrains.Annotations;
 using Pulumi;
 
 namespace Ubiquitous.AutoDevOps.Stack {
     /// <summary>
     /// The default stack, which deploys the <see cref="AutoDevOps"/> resources.
     /// </summary>
+    [PublicAPI]
     public class DefaultStack : Pulumi.Stack {
         protected readonly AutoDevOps AutoDevOps;
 
@@ -28,6 +30,7 @@ namespace Ubiquitous.AutoDevOps.Stack {
     /// A variation of the default stack, which returns a custom result output.
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    [PublicAPI]
     public class DefaultStack<T> : DefaultStack {
         /// <summary>
         /// Default constructor, which uses the default <see cref="AutoDevOps"/> configuration.
