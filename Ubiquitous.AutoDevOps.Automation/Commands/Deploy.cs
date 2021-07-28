@@ -11,10 +11,8 @@ namespace Ubiquitous.AutoDevOps.Commands {
         where T : IStackDeployment<TOptions>
         where TConfig : class, IStackConfiguration<TOptions>
         where TOptions : IDeploymentOptions {
-        public Deploy(T stackDeployment, TConfig configuration, IEnumerable<Option> commandOptions) : base(
-            "deploy",
-            "Deploy (update) the stack"
-        ) {
+        public Deploy(T stackDeployment, TConfig configuration, IEnumerable<Option> commandOptions)
+            : base("deploy", "Deploy (update) the stack") {
             foreach (var option in commandOptions) {
                 AddOption(option);
             }

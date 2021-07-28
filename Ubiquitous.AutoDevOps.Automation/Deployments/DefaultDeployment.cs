@@ -6,7 +6,7 @@ using static Serilog.Log;
 
 namespace Ubiquitous.AutoDevOps.Deployments {
     public class DefaultDeployment<T> : IStackDeployment<T> where T : IDeploymentOptions {
-        public async Task<int> DeployStack(IStackConfiguration<T> configuration, T options) {
+        public async Task<int> DeployStack(IStackConfiguration<T> configuration, T options, bool preview = false) {
             var currentDir = Directory.GetCurrentDirectory();
 
             Information("Starting with {Name} {Stack} in {CurrentDir}", options.Name, options.Stack, currentDir);
@@ -32,6 +32,18 @@ namespace Ubiquitous.AutoDevOps.Deployments {
 
             Information("Installing plugins");
             await configuration.InstallPlugins(appStack.Workspace);
+
+            if (preview) {
+                Information("Executing preview for stack {Stack}", options.Stack);
+
+                 await appStack.PreviewAsync(
+                    new PreviewOptions {
+                        OnStandardOutput = Information,
+                        OnStandardError  = Error
+                    }
+                );
+                 return 0;
+            }
 
             Information("Deploying stack {Stack}", options.Stack);
 

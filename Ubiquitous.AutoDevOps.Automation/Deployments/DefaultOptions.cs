@@ -4,7 +4,7 @@ using System.CommandLine;
 namespace Ubiquitous.AutoDevOps.Deployments {
     public class DefaultOptions : IDeploymentOptions {
         public DefaultOptions(
-            string name, string stack, string tier, string track, string version, string image, int percentage
+            string name, string stack, string tier, string track, string version, string image, int percentage, bool preview
         ) {
             Name       = name;
             Stack      = stack;
@@ -13,6 +13,7 @@ namespace Ubiquitous.AutoDevOps.Deployments {
             Version    = version;
             Image      = image;
             Percentage = percentage;
+            Preview    = preview;
         }
 
         public string Stack      { get; }
@@ -22,6 +23,7 @@ namespace Ubiquitous.AutoDevOps.Deployments {
         public string Version    { get; }
         public string Image      { get; }
         public int    Percentage { get; }
+        public bool   Preview    { get; }
 
         public static IEnumerable<Option> GetOptions()
             => new Option[] {
@@ -29,7 +31,8 @@ namespace Ubiquitous.AutoDevOps.Deployments {
                 new Option<string>("--track", () => "stable", "Application track"),
                 new Option<string>("--image", Settings.GetImageRegistry, "Docker image"),
                 new Option<int>("--percentage", () => 100, "Deployment percentage"),
-                new Option<string>("--version", () => Env.ApplicationVersion, "Application version")
+                new Option<string>("--version", () => Env.ApplicationVersion, "Application version"),
+                new Option<bool>("--preview", () => true, "Run preview instead of update")
             };
     }
 }
