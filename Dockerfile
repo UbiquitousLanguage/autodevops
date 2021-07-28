@@ -21,7 +21,7 @@ RUN dotnet publish ./Ubiquitous.AutoDevOps -c Release -r linux-x64 --no-self-con
 FROM debian:buster-slim
 WORKDIR /pulumi/projects
 
-ARG RUNTIME_VERSION="3.1"
+ARG RUNTIME_VERSION="5.0"
 
 # We need to install ca certs before copying the ms prod debs packages
 RUN --mount=target=/var/lib/apt/lists,type=cache \
