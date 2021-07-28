@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5</TargetFramework>
         <LangVersion>9</LangVersion>
         <NoWarn>$(NoWarn);CS1591;CS0618;</NoWarn>
         <Nullable>enable</Nullable>
@@ -19,7 +19,6 @@
     <ItemGroup>
         <PackageReference Include="MinVer" Version="2.5.0" PrivateAssets="All"/>
         <PackageReference Include="JetBrains.Annotations" Version="2021.2.0" PrivateAssets="All"/>
-        <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>
