@@ -4,7 +4,7 @@ using static System.Environment;
 
 namespace Ubiquitous.AutoDevOps {
     public static class Env {
-        static string EnvVar(string var) => GetEnvironmentVariable(var);
+        static string EnvVar(string var) => GetEnvironmentVariable(var)!;
 
         public const string AppVersionVar      = "APPLICATION_VERSION";
         public const string AppRepositoryVar   = "CI_APPLICATION_REPOSITORY";

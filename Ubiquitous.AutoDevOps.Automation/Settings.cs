@@ -76,8 +76,8 @@ namespace Ubiquitous.AutoDevOps {
     }
 
     public class DeploymentSettings {
-        public ServiceSettings    Service    { get; init; }
-        public IngressSettings    Ingress    { get; init; }
-        public PrometheusSettings Prometheus { get; init; }
+        public ServiceSettings    Service    { get; init; } = default!;
+        public IngressSettings    Ingress    { get; init; } = default!;
+        public PrometheusSettings Prometheus { get; init; } = default!;
     }
 }

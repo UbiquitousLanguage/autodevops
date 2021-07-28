@@ -17,39 +17,49 @@ namespace Ubiquitous.AutoDevOps.Stack.Factories {
             GitLabSettings              gitLabSettings,
             Secret?                     appSecret          = null,
             IEnumerable<ContainerArgs>? sidecars           = null,
-            Action<ContainerArgs>?      configureContainer = null
+            Action<ContainerArgs>?      configureContainer = null,
+            bool                        addDefaultEnvVars  = true
         ) {
             var container = new ContainerArgs {
                 Name            = deploySettings.ResourceName,
                 Image           = deploySettings.Image,
-                ImagePullPolicy = "IfNotPresent",
-                Env = new[] {
-                    EnvVar("ASPNETCORE_ENVIRONMENT", gitLabSettings.EnvName),
-                    EnvVar("GITLAB_ENVIRONMENT_NAME", gitLabSettings.EnvName),
-                    EnvVar("GITLAB_ENVIRONMENT_URL", deploySettings.Url ?? "")
-                },
-                Ports = new[] {
-                    new ContainerPortArgs {Name = "web", ContainerPortValue = appSettings.Port}
-                }
+                ImagePullPolicy = deploySettings.ImagePullPolicy,
             };
 
-            if (appSecret != null) {
-                container.EnvFrom = new EnvFromSourceArgs {
-                    SecretRef = new SecretEnvSourceArgs {Name = appSecret.Metadata.Apply(x => x.Name)}
-                };
-            }
-
-            container.WhenNotEmptyString(
-                appSettings.ReadinessProbe,
-                (c, p) => c.ReadinessProbe =
-                    HttpProbe(p, appSettings.Port)
-            );
-
-            container.WhenNotEmptyString(
-                appSettings.LivenessProbe,
-                (c, p) => c.LivenessProbe =
-                    HttpProbe(p, appSettings.Port)
-            );
+            container
+                .WhenNotEmptyString(
+                    appSettings.PortName,
+                    (c, p) =>
+                        c.Ports = new[] {
+                            new ContainerPortArgs {Name = p, ContainerPortValue = appSettings.Port}
+                        }
+                )
+                .When(
+                    addDefaultEnvVars,
+                    c =>
+                        c.Env = new[] {
+                            EnvVar("ASPNETCORE_ENVIRONMENT", gitLabSettings.EnvName),
+                            EnvVar("GITLAB_ENVIRONMENT_NAME", gitLabSettings.EnvName),
+                            EnvVar("GITLAB_ENVIRONMENT_URL", deploySettings.Url ?? "")
+                        }
+                )
+                .WhenNotNull(
+                    appSecret,
+                    (c, s) =>
+                        c.EnvFrom = new EnvFromSourceArgs {
+                            SecretRef = new SecretEnvSourceArgs {Name = s.Metadata.Apply(x => x.Name)}
+                        }
+                )
+                .WhenNotEmptyString(
+                    appSettings.ReadinessProbe,
+                    (c, p) => c.ReadinessProbe =
+                        HttpProbe(p, appSettings.Port)
+                )
+                .WhenNotEmptyString(
+                    appSettings.LivenessProbe,
+                    (c, p) => c.LivenessProbe =
+                        HttpProbe(p, appSettings.Port)
+                );
 
             configureContainer?.Invoke(container);
 

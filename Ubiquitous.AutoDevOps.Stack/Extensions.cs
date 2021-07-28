@@ -19,8 +19,19 @@ namespace Ubiquitous.AutoDevOps.Stack {
             return inputMap;
         }
 
-        public static void WhenNotEmptyString<T>(this T self, string argument, Action<T, string> action) {
+        public static T When<T>(this T self, bool argument, Action<T> action) {
+            if (argument) action(self);
+            return self;
+        }
+
+        public static T WhenNotEmptyString<T>(this T self, string? argument, Action<T, string> action) {
             if (!string.IsNullOrEmpty(argument)) action(self, argument);
+            return self;
+        }
+
+        public static T WhenNotNull<T, TArg>(this T self, TArg? argument, Action<T, TArg> action) {
+            if (argument is not null) action(self, argument);
+            return self;
         }
 
         public static string Or(this string? val, string alt) => string.IsNullOrEmpty(val) ? alt : val;
@@ -29,6 +40,6 @@ namespace Ubiquitous.AutoDevOps.Stack {
         
         public static string Base64Encode(this string plainText) => Convert.ToBase64String(UTF8.GetBytes(plainText));
 
-        public static bool IsEmpty(this string value) => string.IsNullOrWhiteSpace(value);
+        public static bool IsEmpty(this string? value) => string.IsNullOrWhiteSpace(value);
     }
 }

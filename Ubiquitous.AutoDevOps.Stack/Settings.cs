@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Pulumi;
 
 // ReSharper disable ClassNeverInstantiated.Global
@@ -33,7 +34,9 @@ namespace Ubiquitous.AutoDevOps.Stack {
             int     Percentage,
             string  Image,
             string? Url
-        );
+        ) {
+            public string ImagePullPolicy { get; init; } = "IfNotPresent";
+        }
 
         public record AppSettings(
             string  Name,
@@ -41,15 +44,16 @@ namespace Ubiquitous.AutoDevOps.Stack {
             string  Track,
             string? Version,
             int     Port           = 5000,
+            string? PortName       = "web",
             string  ReadinessProbe = "/ping",
             string  LivenessProbe  = "/health"
         );
 
         public record GitLabSettings(
-            string  App        = "",
-            string  Env        = "development",
-            string  EnvName    = "development",
-            string  Visibility = ""
+            string App        = "",
+            string Env        = "development",
+            string EnvName    = "development",
+            string Visibility = ""
         );
 
         public record RegistrySettings(string Server, string User, string Password, string Email);
@@ -65,15 +69,17 @@ namespace Ubiquitous.AutoDevOps.Stack {
             public string? SecretName { get; init; }
         }
 
+        [PublicAPI]
         public record IngressSettings {
             public bool         Enabled { get; init; }
             public TlsSettings? Tls     { get; init; }
-            public string       Class   { get; init; }
+            public string       Class   { get; init; } = "nginx";
         }
 
+        [PublicAPI]
         public record PrometheusSettings {
             public bool   Metrics  { get; init; }
-            public string Path     { get; init; }
+            public string Path     { get; init; } = "/metrics";
             public bool   Operator { get; init; }
         }
 
