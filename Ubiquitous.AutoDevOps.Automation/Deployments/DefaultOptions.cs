@@ -32,7 +32,7 @@ namespace Ubiquitous.AutoDevOps.Deployments {
                 new Option<string>("--image", Settings.GetImageRegistry, "Docker image"),
                 new Option<int>("--percentage", () => 100, "Deployment percentage"),
                 new Option<string>("--version", () => Env.ApplicationVersion, "Application version"),
-                new Option<bool>("--preview", () => true, "Run preview instead of update")
+                new Option<bool>("--preview", () => false, "Run preview instead of update")
             };
     }
 }
