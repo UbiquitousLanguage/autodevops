@@ -73,8 +73,9 @@ namespace Ubiquitous.AutoDevOps.Stack {
 
             var deployment = KubeDeployment.Create(
                 namespaceName,
-                settings,
-                replicas,
+                settings.Application,
+                settings.Deploy with {Replicas = replicas},
+                settings.GitLab,
                 imagePullSecret,
                 appSecret,
                 sidecars,
@@ -87,7 +88,11 @@ namespace Ubiquitous.AutoDevOps.Stack {
             var service = settings.Service.Enabled
                 ? KubeService.Create(
                     namespaceName,
-                    settings,
+                    settings.Application,
+                    settings.Deploy,
+                    settings.Service,
+                    settings.GitLab,
+                    settings.Prometheus,
                     deployment,
                     serviceAnnotations,
                     configureService,
@@ -95,16 +100,25 @@ namespace Ubiquitous.AutoDevOps.Stack {
                 )
                 : null;
 
-            var ingress = settings.Ingress.Enabled && !settings.Deploy.Url!.IsEmpty()
-                ? KubeIngress.Create(namespaceName, settings, settings.Ingress.Class, ingressAnnotations, provider)
+            var ingress = settings.Ingress.Enabled && !settings.Deploy.Url!.IsEmpty() && service != null
+                ? KubeIngress.Create(
+                    namespaceName,
+                    settings.Application,
+                    settings.Deploy,
+                    settings.Ingress,
+                    service,
+                    settings.Prometheus.Metrics,
+                    ingressAnnotations,
+                    provider
+                )
                 : null;
 
             if (settings.Prometheus.Metrics && settings.Prometheus.Operator) {
                 if (service != null) {
-                    Prometheus.CreateServiceMonitor(settings, service, @namespace, provider);
+                    Prometheus.CreateServiceMonitor(settings.Application, settings.Prometheus, service, @namespace, provider);
                 }
                 else {
-                    Prometheus.CreatePodMonitor(settings, deployment, @namespace, provider);
+                    Prometheus.CreatePodMonitor(settings.Application, deployment, @namespace, provider);
                 }
             }
 

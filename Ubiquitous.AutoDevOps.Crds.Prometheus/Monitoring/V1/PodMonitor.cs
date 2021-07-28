@@ -13,9 +13,11 @@ namespace Ubiquitous.AutoDevOps.Crds.Prometheus.Monitoring.V1 {
     /// </summary>
     [PublicAPI]
     public partial class PodMonitor : KubernetesResource {
-        [Output("apiVersion")] public Output<string> ApiVersion { get; private set; } = null!;
+        [Output("apiVersion")]
+        public Output<string> ApiVersion { get; private set; } = null!;
 
-        [Output("kind")] public Output<string> Kind { get; private set; } = null!;
+        [Output("kind")]
+        public Output<string> Kind { get; private set; } = null!;
 
         [Output("metadata")]
         public Output<Pulumi.Kubernetes.Types.Outputs.Meta.V1.ObjectMeta> Metadata { get; private set; } = null!;
@@ -84,11 +86,14 @@ namespace Ubiquitous.AutoDevOps.Crds.Prometheus.Monitoring.V1 {
     }
 
     public class PodMonitorArgs : ResourceArgs {
-        [Input("apiVersion")] public Input<string>? ApiVersion { get; set; }
+        [Input("apiVersion")]
+        public Input<string>? ApiVersion { get; set; }
 
-        [Input("kind")] public Input<string>? Kind { get; set; }
+        [Input("kind")]
+        public Input<string>? Kind { get; set; }
 
-        [Input("metadata")] public Input<Pulumi.Kubernetes.Types.Inputs.Meta.V1.ObjectMetaArgs>? Metadata { get; set; }
+        [Input("metadata")]
+        public Input<Pulumi.Kubernetes.Types.Inputs.Meta.V1.ObjectMetaArgs>? Metadata { get; set; }
 
         /// <summary>
         /// Specification of desired Pod selection for target discovery by Prometheus.

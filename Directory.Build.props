@@ -1,17 +1,28 @@
 <Project>
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <LangVersion>9</LangVersion>
-    <NoWarn>$(NoWarn);CS1591;CS0618;</NoWarn>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <LangVersion>9</LangVersion>
+        <NoWarn>$(NoWarn);CS1591;CS0618;</NoWarn>
+        <Nullable>enable</Nullable>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <UpdateVersionProperties>true</UpdateVersionProperties>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <PackageIcon>logo.png</PackageIcon>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/UbiquitousAS/autodevops.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <Description>GitLab AutoDevOps implementation with Pulumi</Description>
+        <Authors>Alexey Zimarev</Authors>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MinVer" Version="2.5.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="JetBrains.Annotations" Version="2021.1.0" PrivateAssets="All" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="MinVer" Version="2.5.0" PrivateAssets="All"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2021.1.0" PrivateAssets="All"/>
+        <PackageReference Include="IsExternalInit" Version="1.0.*" PrivateAssets="All" />
+    </ItemGroup>
 
+    <ItemGroup>
+        <None Include="..\logo.png" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 </Project>

@@ -1,5 +1,4 @@
-﻿# syntax=docker/dockerfile:experimental
-ARG PULUMI_VERSION=latest
+﻿ARG PULUMI_VERSION=latest
 ARG PULUMI_IMAGE=pulumi/pulumi-base
 FROM ${PULUMI_IMAGE}:${PULUMI_VERSION} as pulumi
 
@@ -13,7 +12,7 @@ RUN apt-get update -y && \
 RUN curl -o - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.asc.gpg; \
     curl -o /tmp/microsoft-prod.list https://packages.microsoft.com/config/debian/10/prod.list
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:3.1-buster-slim AS build
 COPY . .
 RUN dotnet publish ./Ubiquitous.AutoDevOps -c Release -r linux-x64 --no-self-contained -clp:NoSummary -o /app/publish \
 /p:PublishReadyToRun=true,PublishSingleFile=false
@@ -22,7 +21,7 @@ RUN dotnet publish ./Ubiquitous.AutoDevOps -c Release -r linux-x64 --no-self-con
 FROM debian:buster-slim
 WORKDIR /pulumi/projects
 
-ARG RUNTIME_VERSION="5.0"
+ARG RUNTIME_VERSION="3.1"
 
 # We need to install ca certs before copying the ms prod debs packages
 RUN --mount=target=/var/lib/apt/lists,type=cache \

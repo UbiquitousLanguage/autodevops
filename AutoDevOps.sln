@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps.Crds.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps.Crds.Prometheus", "Ubiquitous.AutoDevOps.Crds.Prometheus\Ubiquitous.AutoDevOps.Crds.Prometheus.csproj", "{F736A681-7F43-48C8-B12F-1670D176EEC9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ubiquitous.AutoDevOps.Crds.Traefik", "Ubiquitous.AutoDevOps.Crds.Traefik\Ubiquitous.AutoDevOps.Crds.Traefik.csproj", "{5ED6D461-E670-449F-83A5-66E8B32F07A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,9 +40,14 @@ Global
 		{F736A681-7F43-48C8-B12F-1670D176EEC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F736A681-7F43-48C8-B12F-1670D176EEC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F736A681-7F43-48C8-B12F-1670D176EEC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5ED6D461-E670-449F-83A5-66E8B32F07A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5ED6D461-E670-449F-83A5-66E8B32F07A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5ED6D461-E670-449F-83A5-66E8B32F07A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5ED6D461-E670-449F-83A5-66E8B32F07A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D3DEFDBB-A5AF-43C5-8B18-B18EC46A40DE} = {7361312B-72A4-4684-91D3-68D937AD1782}
 		{F736A681-7F43-48C8-B12F-1670D176EEC9} = {7361312B-72A4-4684-91D3-68D937AD1782}
+		{5ED6D461-E670-449F-83A5-66E8B32F07A9} = {7361312B-72A4-4684-91D3-68D937AD1782}
 	EndGlobalSection
 EndGlobal

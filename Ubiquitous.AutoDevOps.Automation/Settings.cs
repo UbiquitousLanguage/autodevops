@@ -10,13 +10,13 @@ using static Ubiquitous.AutoDevOps.Stack.AutoDevOpsSettings;
 namespace Ubiquitous.AutoDevOps {
     public static class Settings {
         public static GitLabSettings GitLabSettings()
-            => new(ProjectName, EnvironmentSlug, Env.Environment, EnvironmentUrl, ProjectVisibility);
+            => new(ProjectName, EnvironmentSlug, Env.Environment, ProjectVisibility);
 
         public static RegistrySettings RegistrySettings()
             => new(Registry, DeployRegistryUser, DeployRegistryPassword, UserEmail);
 
-        public static DeploySettings DeploySettings(string image, int percentage, string track)
-            => new(KubeNamespace, Env.Environment, Replicas(track), percentage, image, EnvironmentUrl);
+        public static DeploySettings DeploySettings(string resourceName, string image, int percentage, string track)
+            => new(resourceName, KubeNamespace, Env.Environment, Replicas(track), percentage, image, EnvironmentUrl);
 
         static int Replicas(string track) {
             return int.TryParse(EnvReplicas(track), out var envReplicas) ? Adjust(envReplicas) :

@@ -1,15 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="MinVer" Version="2.5.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Pulumi.Kubernetes" Version="3.4.0" />
   </ItemGroup>
 
@@ -17,10 +7,6 @@
     <None Remove="configurePulumi.sh" />
     <None Remove="AutoDevOps.csproj.DotSettings" />
     <None Remove="AutoDevOps.Stack.csproj.DotSettings" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Crds" />
   </ItemGroup>
 
   <ItemGroup>

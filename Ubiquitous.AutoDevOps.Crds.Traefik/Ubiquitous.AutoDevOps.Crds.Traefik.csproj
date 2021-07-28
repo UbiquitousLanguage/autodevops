@@ -2,4 +2,7 @@
     <ItemGroup>
         <PackageReference Include="Pulumi.Kubernetes" Version="3.*" ExcludeAssets="contentFiles" />
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Ubiquitous.AutoDevOps.Stack\Ubiquitous.AutoDevOps.Stack.csproj" />
+    </ItemGroup>
 </Project>

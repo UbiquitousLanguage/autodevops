@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Pulumi;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Core.V1;
-using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
+using Ubiquitous.AutoDevOps.Stack.Factories;
 using static System.Environment;
 
 namespace Ubiquitous.AutoDevOps.Stack.Resources {
@@ -44,7 +44,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             return new Secret(
                 secretName,
                 new SecretArgs {
-                    Metadata   = CreateArgs.GetMeta(secretName, namespaceName),
+                    Metadata   = Meta.GetMeta(secretName, namespaceName),
                     Type       = "opaque",
                     StringData = vars
                 },
@@ -52,6 +52,13 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             );
         }
 
+        /// <summary>
+        /// Creates a secret for pulling images from the CI image registry
+        /// </summary>
+        /// <param name="namespace"></param>
+        /// <param name="registrySettings"></param>
+        /// <param name="providerResource"></param>
+        /// <returns></returns>
         public static Secret CreateRegistrySecret(
             Output<string>                      @namespace,
             AutoDevOpsSettings.RegistrySettings registrySettings,
@@ -68,7 +75,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             return new Secret(
                 secretName,
                 new SecretArgs {
-                    Metadata = CreateArgs.GetMeta(secretName, @namespace),
+                    Metadata = Meta.GetMeta(secretName, @namespace),
                     Type     = "kubernetes.io/dockerconfigjson",
                     Data     = new InputMap<string> {{".dockerconfigjson", content}}
                 },

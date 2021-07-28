@@ -1,42 +1,51 @@
 using System;
 using System.Collections.Generic;
 using Pulumi;
-using Pulumi.Kubernetes.Networking.V1;
-using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
+using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Networking.V1;
+using Ubiquitous.AutoDevOps.Stack.Factories;
+using static Ubiquitous.AutoDevOps.Stack.AutoDevOpsSettings;
+using Ingress = Pulumi.Kubernetes.Networking.V1.Ingress;
 
 namespace Ubiquitous.AutoDevOps.Stack.Resources {
     public static class KubeIngress {
         public static Ingress Create(
             Output<string>              namespaceName,
-            AutoDevOpsSettings          settings,
-            string                      ingressClass,
+            AppSettings                 appSettings,
+            DeploySettings              deploySettings,
+            IngressSettings             ingressSettings,
+            Service                     service,
+            bool                        metricsEnabled,
             Dictionary<string, string>? annotations      = null,
             ProviderResource?           providerResource = null
         ) {
-            var ingressLabels = settings.BaseLabels();
-            var tlsEnabled    = settings.Ingress.Tls?.Enabled == true;
+            var ingressLabels = Meta.BaseLabels(appSettings, deploySettings);
+            var tlsEnabled    = ingressSettings.Tls?.Enabled == true;
 
             var ingressAnnotations = (annotations ?? new Dictionary<string, string>())
                 .AsInputMap()
-                .AddPair("kubernetes.io/ingress.class", ingressClass)
+                .AddPair("kubernetes.io/ingress.class", ingressSettings.Class)
                 .AddPairIf(tlsEnabled, "kubernetes.io/tls-acme", "true")
                 .AddPairIf(
-                    settings.Prometheus.Metrics && ingressClass.Contains("nginx"),
+                    metricsEnabled && ingressSettings.Class.Contains("nginx"),
                     "nginx.ingress.kubernetes.io/server-snippet",
                     "location /metrics { deny all; }"
                 );
 
-            var uri = new Uri(settings.Deploy.Url!);
+            var uri = new Uri(deploySettings.Url!);
 
             var ingress = new IngressArgs {
-                Metadata = CreateArgs.GetMeta(settings.FullName(), namespaceName, ingressAnnotations, ingressLabels),
+                Metadata = Meta.GetMeta(appSettings.Name, namespaceName, ingressAnnotations, ingressLabels),
                 Spec = new IngressSpecArgs {
-                    Rules = CreateArgs.IngressRule(uri.Host, settings.FullName(), settings.Service.ExternalPort),
+                    Rules = Factories.Ingress.IngressRule(
+                        uri.Host,
+                        service.Metadata.Apply(x => x.Name),
+                        service.Spec.Apply(x => x.Ports[0].Port)
+                    ),
                     Tls = tlsEnabled
                         ? new[] {
                             new IngressTLSArgs {
-                                SecretName = settings.Ingress.Tls!.SecretName ?? $"{settings.Application.Name}-tls",
+                                SecretName = ingressSettings.Tls!.SecretName ?? $"{appSettings.Name}-tls",
                                 Hosts      = new[] {uri.Host}
                             }
                         }
@@ -45,7 +54,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             };
 
             return new Ingress(
-                settings.PulumiName("ingress"),
+                appSettings.PulumiName("ingress"),
                 ingress,
                 new CustomResourceOptions {Provider = providerResource}
             );

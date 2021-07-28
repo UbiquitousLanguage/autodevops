@@ -5,14 +5,17 @@ using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Apps.V1;
 using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
+using Ubiquitous.AutoDevOps.Stack.Factories;
+using static Ubiquitous.AutoDevOps.Stack.AutoDevOpsSettings;
 using Deployment = Pulumi.Kubernetes.Apps.V1.Deployment;
 
 namespace Ubiquitous.AutoDevOps.Stack.Resources {
     public static class KubeDeployment {
         public static Deployment Create(
             Output<string>              namespaceName,
-            AutoDevOpsSettings          settings,
-            int                         replicas,
+            AppSettings                 appSettings,
+            DeploySettings              deploySettings,
+            GitLabSettings              gitLabSettings,
             Secret?                     imagePullSecret     = null,
             Secret?                     appSecret           = null,
             IEnumerable<ContainerArgs>? sidecars            = null,
@@ -21,24 +24,24 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             Action<DeploymentArgs>?     configureDeployment = null,
             ProviderResource?           providerResource    = null
         ) {
-            var appLabels         = settings.AppLabels();
-            var gitLabAnnotations = settings.GitLabAnnotations();
+            var appLabels         = Meta.AppLabels(appSettings, deploySettings);
+            var gitLabAnnotations = gitLabSettings.GitLabAnnotations();
 
-            var containers = CreateArgs.GetAppContainers(
-                settings.Application,
-                settings.Deploy,
-                settings.GitLab,
+            var containers = Pods.GetAppContainers(
+                appSettings,
+                deploySettings,
+                gitLabSettings,
                 appSecret,
                 sidecars,
                 configureContainer
             );
 
             var deployment = new DeploymentArgs {
-                Metadata = CreateArgs.GetMeta(settings.FullName(), namespaceName, gitLabAnnotations, appLabels),
+                Metadata = Meta.GetMeta(appSettings.Name, namespaceName, gitLabAnnotations, appLabels),
                 Spec = new DeploymentSpecArgs {
                     Selector = new LabelSelectorArgs {MatchLabels = appLabels},
-                    Replicas = replicas,
-                    Template = CreateArgs.GetPodTemplate(
+                    Replicas = deploySettings.Replicas,
+                    Template = Pods.GetPodTemplate(
                         namespaceName,
                         containers,
                         imagePullSecret,
@@ -52,7 +55,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             configureDeployment?.Invoke(deployment);
 
             return new Deployment(
-                settings.PulumiName("deployment"),
+                appSettings.PulumiName("deployment"),
                 deployment,
                 new CustomResourceOptions {Provider = providerResource}
             );

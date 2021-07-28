@@ -4,22 +4,24 @@ using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Meta.V1;
 using Ubiquitous.AutoDevOps.Crds.Prometheus.Monitoring.V1;
 using Ubiquitous.AutoDevOps.Crds.Prometheus.Monitoring.V1.Inputs;
+using Ubiquitous.AutoDevOps.Stack.Factories;
+using static Ubiquitous.AutoDevOps.Stack.AutoDevOpsSettings;
 
 namespace Ubiquitous.AutoDevOps.Stack.Addons {
     [PublicAPI]
     public static class Prometheus {
         public static PodMonitor CreatePodMonitor(
-            AutoDevOpsSettings                   settings,
+            AppSettings                          appSettings,
             Pulumi.Kubernetes.Apps.V1.Deployment deployment,
             Namespace                            kubeNamespace,
             ProviderResource?                    providerResource = null
         )
             => new(
-                settings.PulumiName("podMonitor"),
+                appSettings.PulumiName("podMonitor"),
                 new PodMonitorArgs {
                     Metadata = new ObjectMetaArgs {
                         Namespace = kubeNamespace.Metadata.Apply(x => x.Name),
-                        Name      = settings.FullName(),
+                        Name      = appSettings.Name,
                         Labels    = new InputMap<string> {{"tier", "web"}}
                     },
                     Spec = new PodMonitorSpecArgs {
@@ -42,17 +44,18 @@ namespace Ubiquitous.AutoDevOps.Stack.Addons {
             );
 
         public static ServiceMonitor CreateServiceMonitor(
-            AutoDevOpsSettings settings,
+            AppSettings        appSettings,
+            PrometheusSettings prometheusSettings,
             Service            service,
             Namespace          kubeNamespace,
             ProviderResource?  providerResource = null
         )
             => new(
-                settings.PulumiName("serviceMonitor"),
+                appSettings.PulumiName("serviceMonitor"),
                 new ServiceMonitorArgs {
                     Metadata = new ObjectMetaArgs {
                         Namespace = kubeNamespace.Metadata.Apply(x => x.Name),
-                        Name      = settings.FullName(),
+                        Name      = appSettings.Name,
                         Labels    = new InputMap<string> {{"tier", "web"}}
                     },
                     Spec = new ServiceMonitorSpecArgs {
@@ -64,7 +67,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Addons {
                         },
                         Endpoints = new ServiceMonitorSpecEndpointsArgs {
                             Port     = "web",
-                            Path     = settings.Prometheus.Path,
+                            Path     = prometheusSettings.Path,
                             Interval = "15s"
                         }
                     }

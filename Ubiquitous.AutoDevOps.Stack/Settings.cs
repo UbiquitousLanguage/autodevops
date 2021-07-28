@@ -16,10 +16,6 @@ namespace Ubiquitous.AutoDevOps.Stack {
             Env         = config.GetObject<EnvVar[]>("env");
         }
 
-        public string PulumiName(string resource) => $"{Application.Name}-{resource}";
-
-        public string FullName() => $"{Application.Name}-{GitLab.EnvName}";
-
         public EnvVar[]?          Env         { get; }
         public DeploySettings     Deploy      { get; }
         public AppSettings        Application { get; }
@@ -30,6 +26,7 @@ namespace Ubiquitous.AutoDevOps.Stack {
         public PrometheusSettings Prometheus  { get; }
 
         public record DeploySettings(
+            string  ResourceName,
             string  Namespace,
             string  Release,
             int     Replicas,
@@ -52,7 +49,6 @@ namespace Ubiquitous.AutoDevOps.Stack {
             string  App        = "",
             string  Env        = "development",
             string  EnvName    = "development",
-            string? EnvUrl     = null,
             string  Visibility = ""
         );
 
