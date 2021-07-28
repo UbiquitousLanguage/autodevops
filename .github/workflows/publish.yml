@@ -22,10 +22,6 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: '%NUGET_AUTH_TOKEN%'
       -  
-        name: Run minver
-        id: version
-        uses: thefringeninja/action-minver@2.0.0-preview1
-      -  
         name: Create and push NuGet package
         run: |
           dotnet pack -c Release -o nuget -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
@@ -33,6 +29,12 @@ jobs:
           dotnet nuget push nuget/**/*.nupkg --skip-duplicate --api-key ${{ github.token }}
         env:
           NUGET_AUTH_TOKEN: ${{ github.token }}
+      -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ubiquitousas/autodevops
       -
         name: Login to DockerHub
         uses: docker/login-action@v1
@@ -44,4 +46,5 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: ubiquitousas/autodevops:${{ steps.version.outputs.version }},ubiquitousas/autodevops:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
