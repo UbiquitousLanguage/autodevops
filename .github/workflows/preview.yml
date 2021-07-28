@@ -17,9 +17,15 @@ jobs:
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         env:
           NUGET_AUTH_TOKEN: '%NUGET_AUTH_TOKEN%'
-      - name: Create and push NuGet package
+      -  
+        name: Create and push NuGet package
         run: |
           dotnet pack -c Release -o nuget -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
           dotnet nuget push nuget/**/*.nupkg --skip-duplicate --api-key ${{ github.token }}
         env:
           NUGET_AUTH_TOKEN: ${{ github.token }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          push: false

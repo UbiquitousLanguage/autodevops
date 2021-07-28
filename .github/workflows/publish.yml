@@ -10,17 +10,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      -  
+        name: Checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         env:
           NUGET_AUTH_TOKEN: '%NUGET_AUTH_TOKEN%'
-      - name: Create and push NuGet package
+      -  
+        name: Run minver
+        id: version
+        uses: thefringeninja/action-minver
+      -  
+        name: Create and push NuGet package
         run: |
           dotnet pack -c Release -o nuget -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
           dotnet nuget push nuget/**/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
           dotnet nuget push nuget/**/*.nupkg --skip-duplicate --api-key ${{ github.token }}
         env:
           NUGET_AUTH_TOKEN: ${{ github.token }}
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ubiquitousas/autodevops:${{ steps.version.outputs.version }},ubiquitousas/autodevops:latest

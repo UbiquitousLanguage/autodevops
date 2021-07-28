@@ -12,7 +12,7 @@ RUN apt-get update -y && \
 RUN curl -o - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.asc.gpg; \
     curl -o /tmp/microsoft-prod.list https://packages.microsoft.com/config/debian/10/prod.list
 
-FROM mcr.microsoft.com/dotnet/sdk:3.1-buster-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
 COPY . .
 RUN dotnet publish ./Ubiquitous.AutoDevOps -c Release -r linux-x64 --no-self-contained -clp:NoSummary -o /app/publish \
 /p:PublishReadyToRun=true,PublishSingleFile=false
