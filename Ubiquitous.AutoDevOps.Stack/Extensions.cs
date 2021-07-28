@@ -30,11 +30,5 @@ namespace Ubiquitous.AutoDevOps.Stack {
         public static string Base64Encode(this string plainText) => Convert.ToBase64String(UTF8.GetBytes(plainText));
 
         public static bool IsEmpty(this string value) => string.IsNullOrWhiteSpace(value);
-
-        public static Input<T>? AsInput<T>(this T? value) {
-            if (value == null) return null;
-
-            return value;
-        }
     }
 }
