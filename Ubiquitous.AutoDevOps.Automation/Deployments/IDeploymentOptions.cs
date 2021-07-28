@@ -5,5 +5,6 @@ namespace Ubiquitous.AutoDevOps.Deployments {
         string Tier    { get; }
         string Track   { get; }
         string Version { get; }
+        bool   Preview { get; }
     }
 }
