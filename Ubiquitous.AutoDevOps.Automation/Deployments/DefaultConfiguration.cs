@@ -7,7 +7,7 @@ using Ubiquitous.AutoDevOps.Stack;
 namespace Ubiquitous.AutoDevOps.Deployments {
     public class DefaultConfiguration : IStackConfiguration<DefaultOptions> {
         public Task InstallPlugins(Workspace workspace)
-            => workspace.InstallPluginAsync("kubernetes", "v3.4.0");
+            => workspace.InstallPluginAsync("kubernetes", "v3.5.1");
 
         public async Task ConfigureStack(
             WorkspaceStack                 appStack,
