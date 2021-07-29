@@ -19,7 +19,7 @@ namespace Ubiquitous.AutoDevOps.Deployments {
             await appStack.SetGitLabSettings();
             await appStack.SetRegistrySettings();
             await appStack.SetJsonConfig("app", appSettings);
-            await appStack.SetJsonConfig("deploy", Settings.DeploySettings(appSettings.Name, options.Image, options.Percentage, appSettings.Track));
+            await appStack.SetJsonConfig("deploy", Settings.DeploySettings(options.Image, options.Percentage, appSettings.Track));
             await appStack.SetJsonConfig("service", deploymentSettings.Service);
             await appStack.SetJsonConfig("ingress", deploymentSettings.Ingress);
             await appStack.SetJsonConfig("prometheus", deploymentSettings.Prometheus);

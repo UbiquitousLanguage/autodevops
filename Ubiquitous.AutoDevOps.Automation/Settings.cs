@@ -15,8 +15,8 @@ namespace Ubiquitous.AutoDevOps {
         public static RegistrySettings RegistrySettings()
             => new(Registry, DeployRegistryUser, DeployRegistryPassword, UserEmail);
 
-        public static DeploySettings DeploySettings(string resourceName, string image, int percentage, string track)
-            => new(resourceName, KubeNamespace, Env.Environment, Replicas(track), percentage, image, EnvironmentUrl);
+        public static DeploySettings DeploySettings(string image, int percentage, string track)
+            => new(KubeNamespace, Env.Environment, Replicas(track), percentage, image, EnvironmentUrl);
 
         static int Replicas(string track) {
             return int.TryParse(EnvReplicas(track), out var envReplicas) ? Adjust(envReplicas) :
