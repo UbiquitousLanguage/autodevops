@@ -9,23 +9,23 @@ namespace Ubiquitous.AutoDevOps.Crds.Traefik {
     [PublicAPI]
     public class TraefikIngressRoute {
         public TraefikIngressRoute(
-            string         ingressRouteName,
+            ResourceName   ingressRouteName,
             Uri            environmentUri,
             Service        service,
             Output<string> namespaceName,
             string         endpoint,
             bool           tls
         ) {
-            InputList<string>                           endpoints   = new() { endpoint };
+            InputList<string>                           endpoints   = new() {endpoint};
             InputList<IngressRouteRouteMiddlewaresArgs> middlewares = new();
 
             if (tls) {
                 endpoints.Add($"{endpoint}-https");
-                middlewares.Add(new IngressRouteRouteMiddlewaresArgs { Name = "http-to-https", Namespace = "default" });
+                middlewares.Add(new IngressRouteRouteMiddlewaresArgs {Name = "http-to-https", Namespace = "default"});
             }
 
             IngressRule = new IngressRoute(
-                ingressRouteName,
+                ingressRouteName.AsPulumiName(),
                 new IngressRouteArgs {
                     Metadata = Meta.GetMeta(ingressRouteName, namespaceName),
                     Spec = new IngressRouteSpecArgs {

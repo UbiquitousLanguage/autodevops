@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using Pulumi;
 using Pulumi.Kubernetes.Core.V1;
-using Pulumi.Kubernetes.Networking.V1;
 using Pulumi.Kubernetes.Types.Inputs.Apps.V1;
 using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using Ubiquitous.AutoDevOps.Stack.Addons;
+using Ubiquitous.AutoDevOps.Stack.Factories;
 using Ubiquitous.AutoDevOps.Stack.Resources;
 using Deployment = Pulumi.Kubernetes.Apps.V1.Deployment;
 using static System.Environment;
+using Ingress = Pulumi.Kubernetes.Networking.V1.Ingress;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable InvertIf
@@ -67,11 +68,15 @@ namespace Ubiquitous.AutoDevOps.Stack {
                 DeploymentResult = new Result {Namespace = @namespace};
                 return;
             }
+            
+            ResourceName.SetBaseName(settings.Application.Name);
+            PulumiName.SetBaseName(settings.Application.Name);
 
-            var appSecret = KubeSecret.CreateAppSecret(@namespace, settings, provider);
+            var appSecret = KubeSecret.CreateAppSecret(@namespace, "appsecret", settings, provider);
 
             var deployment = KubeDeployment.Create(
                 @namespace,
+                "deployment",
                 settings.Application,
                 settings.Deploy with {Replicas = replicas},
                 settings.GitLab,
@@ -87,12 +92,13 @@ namespace Ubiquitous.AutoDevOps.Stack {
             var service = settings.Service.Enabled
                 ? KubeService.Create(
                     @namespace,
+                    "service",
                     settings.Application,
                     settings.Deploy,
                     settings.Service,
                     settings.GitLab,
-                    settings.Prometheus,
                     deployment,
+                    settings.Prometheus,
                     serviceAnnotations,
                     configureService,
                     provider
@@ -102,6 +108,8 @@ namespace Ubiquitous.AutoDevOps.Stack {
             var ingress = settings.Ingress.Enabled && !settings.Deploy.Url!.IsEmpty() && service != null
                 ? KubeIngress.Create(
                     @namespace,
+                    "ingress",
+                    settings.Application,
                     settings.Deploy,
                     settings.Ingress,
                     service,
@@ -113,10 +121,10 @@ namespace Ubiquitous.AutoDevOps.Stack {
 
             if (settings.Prometheus.Metrics && settings.Prometheus.Operator) {
                 if (service != null) {
-                    Prometheus.CreateServiceMonitor(settings.Deploy, settings.Prometheus, service, @namespace, provider);
+                    Prometheus.CreateServiceMonitor("service-monitor", settings.Prometheus, service, @namespace, provider);
                 }
                 else {
-                    Prometheus.CreatePodMonitor(settings.Deploy, deployment, @namespace, provider);
+                    Prometheus.CreatePodMonitor("pod-monitor", deployment, @namespace, provider);
                 }
             }
 

@@ -12,20 +12,22 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
     public static class KubeService {
         public static Service Create(
             Namespace                            kubens,
+            ResourceName                         resourceName,
             AppSettings                          appSettings,
             DeploySettings                       deploySettings,
             ServiceSettings                      serviceSettings,
             GitLabSettings                       gitLabSettings,
-            PrometheusSettings                   prometheusSettings,
             Pulumi.Kubernetes.Apps.V1.Deployment deployment,
-            Dictionary<string, string>?          annotations      = null,
-            Action<ServiceArgs>?                 configureService = null,
-            ProviderResource?                    providerResource = null
+            PrometheusSettings?                  prometheusSettings = null,
+            Dictionary<string, string>?          annotations        = null,
+            Action<ServiceArgs>?                 configureService   = null,
+            ProviderResource?                    providerResource   = null
         ) {
             var selector = deployment.Spec.Apply(x => x.Selector.MatchLabels);
 
             return Create(
                 kubens,
+                resourceName,
                 appSettings,
                 deploySettings,
                 serviceSettings,
@@ -40,20 +42,22 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
 
         public static Service Create(
             Namespace                             kubens,
+            ResourceName                          resourceName,
             AppSettings                           appSettings,
             DeploySettings                        deploySettings,
             ServiceSettings                       serviceSettings,
             GitLabSettings                        gitLabSettings,
-            PrometheusSettings                    prometheusSettings,
             Pulumi.Kubernetes.Apps.V1.StatefulSet statefulSet,
-            Dictionary<string, string>?           annotations      = null,
-            Action<ServiceArgs>?                  configureService = null,
-            ProviderResource?                     providerResource = null
+            PrometheusSettings?                   prometheusSettings = null,
+            Dictionary<string, string>?           annotations        = null,
+            Action<ServiceArgs>?                  configureService   = null,
+            ProviderResource?                     providerResource   = null
         ) {
             var selector = statefulSet.Spec.Apply(x => x.Selector.MatchLabels);
 
             return Create(
                 kubens,
+                resourceName,
                 appSettings,
                 deploySettings,
                 serviceSettings,
@@ -68,22 +72,23 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
 
         public static Service Create(
             Namespace                   kubens,
+            ResourceName                resourceName,
             AppSettings                 appSettings,
             DeploySettings              deploySettings,
             ServiceSettings             serviceSettings,
             GitLabSettings              gitLabSettings,
-            PrometheusSettings          prometheusSettings,
+            PrometheusSettings?         prometheusSettings,
             InputMap<string>            selector,
             Dictionary<string, string>? annotations      = null,
             Action<ServiceArgs>?        configureService = null,
             ProviderResource?           providerResource = null
         ) {
-            var serviceLabels = deploySettings.BaseLabels();
+            var serviceLabels = Meta.BaseLabels(appSettings, resourceName, deploySettings.Release);
 
             var serviceAnnotations = (annotations ?? new Dictionary<string, string>())
                 .AsInputMap();
 
-            if (prometheusSettings.Metrics && !prometheusSettings.Operator) {
+            if (prometheusSettings != null && prometheusSettings.Metrics && !prometheusSettings.Operator) {
                 serviceAnnotations
                     .AddPair("prometheus.io/scrape", "true")
                     .AddPair("prometheus.io/path", prometheusSettings.Path)
@@ -94,7 +99,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
                 new ServiceArgs {
                     Metadata =
                         Meta.GetMeta(
-                            deploySettings.ResourceName,
+                            resourceName,
                             kubens.GetName(),
                             serviceAnnotations,
                             serviceLabels
@@ -115,7 +120,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             configureService?.Invoke(serviceArgs);
 
             return new Service(
-                deploySettings.PulumiName("service"),
+                resourceName.AsPulumiName(),
                 serviceArgs,
                 new CustomResourceOptions {Provider = providerResource}
             );

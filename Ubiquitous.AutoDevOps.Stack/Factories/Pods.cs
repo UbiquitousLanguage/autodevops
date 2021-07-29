@@ -12,6 +12,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Factories {
     [PublicAPI]
     public static class Pods {
         public static List<ContainerArgs> GetAppContainers(
+            ResourceName                resourceName,
             AppSettings                 appSettings,
             DeploySettings              deploySettings,
             GitLabSettings              gitLabSettings,
@@ -21,7 +22,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Factories {
             bool                        addDefaultEnvVars  = true
         ) {
             var container = new ContainerArgs {
-                Name            = deploySettings.ResourceName,
+                Name            = resourceName,
                 Image           = deploySettings.Image,
                 ImagePullPolicy = deploySettings.ImagePullPolicy,
             };
@@ -129,6 +130,9 @@ namespace Ubiquitous.AutoDevOps.Stack.Factories {
 
         public static EnvVarArgs EnvVar(string name, string value) => new() {Name = name, Value = value};
 
+        public static VolumeMountArgs VolumeMount(string name, string mountPath)
+            => new() {Name = name, MountPath = mountPath};
+        
         public static EnvVarArgs FieldFrom(string envName, string field)
             => new() {
                 Name      = envName,

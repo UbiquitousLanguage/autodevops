@@ -11,6 +11,8 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
     public static class KubeIngress {
         public static Ingress Create(
             Namespace                   kubens,
+            ResourceName                resourceName,
+            AppSettings                 appSettings,
             DeploySettings              deploySettings,
             IngressSettings             ingressSettings,
             Service                     service,
@@ -18,7 +20,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             Dictionary<string, string>? annotations      = null,
             ProviderResource?           providerResource = null
         ) {
-            var ingressLabels = deploySettings.BaseLabels();
+            var ingressLabels = Meta.BaseLabels(appSettings, resourceName, deploySettings.Release);
             var tlsEnabled    = ingressSettings.Tls?.Enabled == true;
 
             var ingressAnnotations = (annotations ?? new Dictionary<string, string>())
@@ -35,7 +37,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
 
             var ingress = new IngressArgs {
                 Metadata = Meta.GetMeta(
-                    deploySettings.ResourceName,
+                    resourceName,
                     kubens.GetName(),
                     ingressAnnotations,
                     ingressLabels
@@ -49,7 +51,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
                     Tls = tlsEnabled
                         ? new[] {
                             new IngressTLSArgs {
-                                SecretName = ingressSettings.Tls!.SecretName ?? $"{deploySettings.ResourceName}-tls",
+                                SecretName = ingressSettings.Tls!.SecretName ?? $"{resourceName}-tls",
                                 Hosts      = new[] {uri.Host}
                             }
                         }
@@ -58,7 +60,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             };
 
             return new Ingress(
-                deploySettings.PulumiName("ingress"),
+                resourceName.AsPulumiName(),
                 ingress,
                 new CustomResourceOptions {Provider = providerResource}
             );

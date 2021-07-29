@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Pulumi;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Core.V1;
@@ -7,16 +8,19 @@ using Ubiquitous.AutoDevOps.Stack.Factories;
 using static System.Environment;
 
 namespace Ubiquitous.AutoDevOps.Stack.Resources {
+    [PublicAPI]
     public static class KubeSecret {
         /// <summary>
         /// Create the application secret from CI variables, which are prefixed with K8S_SECRET_
         /// </summary>
         /// <param name="namespace">Namespace, where the secret should be created</param>
+        /// <param name="resourceName">Resource name</param>
         /// <param name="settings">AutoDevOps settings</param>
         /// <param name="providerResource">Optional: customer Kubernetes provider</param>
         /// <returns></returns>
         public static Secret? CreateAppSecret(
             Namespace          @namespace,
+            ResourceName       resourceName,
             AutoDevOpsSettings settings,
             ProviderResource?  providerResource = null
         ) {
@@ -41,18 +45,40 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
 
             if (vars.Count == 0) return null;
 
-            var secretName = $"{settings.Application.Name}-secret";
-
             return new Secret(
-                secretName,
+                resourceName.AsPulumiName(),
                 new SecretArgs {
-                    Metadata   = Meta.GetMeta(secretName, @namespace.GetName()),
+                    Metadata   = Meta.GetMeta(resourceName, @namespace.GetName()),
                     Type       = "opaque",
                     StringData = vars
                 },
                 new CustomResourceOptions {Provider = providerResource}
             );
         }
+
+        /// <summary>
+        /// Create a custom app secret using a string map
+        /// </summary>
+        /// <param name="namespace">Deployment namespace</param>
+        /// <param name="resourceName">Resource name for Secret</param>
+        /// <param name="variables">Environment vars</param>
+        /// <param name="providerResource"></param>
+        /// <returns>Kubernetes Secret resource</returns>
+        public static Secret CreateAppSecret(
+            Namespace         @namespace,
+            ResourceName      resourceName,
+            InputMap<string>  variables,
+            ProviderResource? providerResource = null
+        )
+            => new(
+                resourceName.AsPulumiName(),
+                new SecretArgs {
+                    Metadata   = Meta.GetMeta(resourceName, @namespace.GetName()),
+                    Type       = "opaque",
+                    StringData = variables
+                },
+                new CustomResourceOptions {Provider = providerResource}
+            );
 
         /// <summary>
         /// Creates a secret for pulling images from the CI image registry

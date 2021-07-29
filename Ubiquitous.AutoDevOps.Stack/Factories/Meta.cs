@@ -8,7 +8,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Factories {
     [PublicAPI]
     public static class Meta {
         public static ObjectMetaArgs GetMeta(
-            string            name,
+            ResourceName      name,
             Input<string>     @namespace,
             InputMap<string>? annotations = null,
             InputMap<string>? labels      = null
@@ -23,18 +23,29 @@ namespace Ubiquitous.AutoDevOps.Stack.Factories {
         /// <summary>
         /// Gets the default labels, which identify the app and the release
         /// </summary>
-        /// <param name="deploySettings">Deployment settings</param>
+        /// <param name="appSettings">Application settings</param>
+        /// <param name="resourceName">Kubernetes resource name</param>
+        /// <param name="release">Deployment release</param>
         /// <returns>An input map with default annotations</returns>
-        public static InputMap<string> BaseLabels(this DeploySettings deploySettings)
+        public static InputMap<string> BaseLabels(AppSettings appSettings, ResourceName resourceName, string release)
             => new() {
-                {"app", deploySettings.ResourceName},
-                {"release", deploySettings.Release}
+                {"app", appSettings.Name},
+                {"component", resourceName},
+                {"release", release}
             };
 
-        public static InputMap<string> AppLabels(AppSettings appSettings, DeploySettings deploySettings)
+        /// <summary>
+        /// Add default labels following GitLab expectations
+        /// </summary>
+        /// <param name="appSettings">Application settings, used for Track, Tier and Version</param>
+        /// <param name="resourceName">Kubernetes resource name</param>
+        /// <param name="release">Deployment release</param>
+        /// <returns></returns>
+        public static InputMap<string> AppLabels(AppSettings appSettings, string resourceName, string release)
             => new() {
-                {"app", deploySettings.ResourceName},
-                {"release", deploySettings.Release},
+                {"app", appSettings.Name},
+                {"component", resourceName},
+                {"release", release},
                 {"track", appSettings.Track},
                 {"tier", appSettings.Tier},
                 {"version", appSettings.Version ?? ""}

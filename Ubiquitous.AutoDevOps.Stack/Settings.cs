@@ -33,7 +33,6 @@ namespace Ubiquitous.AutoDevOps.Stack {
 
         [PublicAPI]
         public record DeploySettings(
-            string  ResourceName,
             string  Namespace,
             string  Release,
             int     Replicas,

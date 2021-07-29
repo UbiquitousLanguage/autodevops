@@ -1,6 +1,5 @@
 using System;
 using JetBrains.Annotations;
-using Pulumi;
 using Pulumi.Kubernetes.Batch.V1Beta1;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Batch.V1;
@@ -16,8 +15,9 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
     public class KubeCronJob {
         public static CronJob Create(
             Namespace              kubens,
+            ResourceName           resourceName,
             AppSettings            appSettings,
-            DeploySettings         jobSettings,
+            DeploySettings         deploySettings,
             GitLabSettings         gitLabSettings,
             string                 schedule,
             Secret                 imagePullSecret,
@@ -25,12 +25,13 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             Action<ContainerArgs>? configureContainer = null,
             Action<PodSpecArgs>?   configurePod       = null
         ) {
-            var appLabels         = Meta.AppLabels(appSettings, jobSettings);
+            var appLabels         = Meta.AppLabels(appSettings, resourceName, deploySettings.Release);
             var gitLabAnnotations = gitLabSettings.GitLabAnnotations();
 
             var containers = Pods.GetAppContainers(
+                resourceName,
                 appSettings,
-                jobSettings,
+                deploySettings,
                 gitLabSettings,
                 appSecret,
                 configureContainer: cfg => {
@@ -53,9 +54,9 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             );
 
             return new CronJob(
-                jobSettings.PulumiName("job"),
+                resourceName.AsPulumiName(),
                 new CronJobArgs {
-                    Metadata = Meta.GetMeta(appSettings.Name, kubens.GetName(), gitLabAnnotations, appLabels),
+                    Metadata = Meta.GetMeta(resourceName, kubens.GetName(), gitLabAnnotations, appLabels),
                     Spec = new CronJobSpecArgs {
                         Schedule          = schedule,
                         ConcurrencyPolicy = "Forbid",

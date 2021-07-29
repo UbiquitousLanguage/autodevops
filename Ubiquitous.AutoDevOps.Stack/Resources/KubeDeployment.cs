@@ -13,6 +13,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
     public static class KubeDeployment {
         public static Deployment Create(
             Namespace                   kubens,
+            ResourceName                resourceName,
             AppSettings                 appSettings,
             DeploySettings              deploySettings,
             GitLabSettings              gitLabSettings,
@@ -24,10 +25,11 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             Action<DeploymentArgs>?     configureDeployment = null,
             ProviderResource?           providerResource    = null
         ) {
-            var appLabels         = Meta.AppLabels(appSettings, deploySettings);
+            var appLabels         = Meta.AppLabels(appSettings, resourceName, deploySettings.Release);
             var gitLabAnnotations = gitLabSettings.GitLabAnnotations();
 
             var containers = Pods.GetAppContainers(
+                resourceName,
                 appSettings,
                 deploySettings,
                 gitLabSettings,
@@ -37,7 +39,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             );
 
             var deployment = new DeploymentArgs {
-                Metadata = Meta.GetMeta(appSettings.Name, kubens.GetName(), gitLabAnnotations, appLabels),
+                Metadata = Meta.GetMeta(resourceName, kubens.GetName(), gitLabAnnotations, appLabels),
                 Spec = new DeploymentSpecArgs {
                     Selector = new LabelSelectorArgs {MatchLabels = appLabels},
                     Replicas = deploySettings.Replicas,
@@ -55,7 +57,7 @@ namespace Ubiquitous.AutoDevOps.Stack.Resources {
             configureDeployment?.Invoke(deployment);
 
             return new Deployment(
-                deploySettings.PulumiName("deployment"),
+                resourceName.AsPulumiName(),
                 deployment,
                 new CustomResourceOptions {Provider = providerResource}
             );

@@ -11,17 +11,17 @@ namespace Ubiquitous.AutoDevOps.Stack.Addons {
     [PublicAPI]
     public static class Prometheus {
         public static PodMonitor CreatePodMonitor(
-            DeploySettings                       deploySettings,
+            ResourceName                         resourceName,
             Pulumi.Kubernetes.Apps.V1.Deployment deployment,
             Namespace                            kubeNamespace,
             ProviderResource?                    providerResource = null
         )
             => new(
-                deploySettings.PulumiName("podMonitor"),
+                resourceName.AsPulumiName(),
                 new PodMonitorArgs {
                     Metadata = new ObjectMetaArgs {
                         Namespace = kubeNamespace.Metadata.Apply(x => x.Name),
-                        Name      = deploySettings.ResourceName,
+                        Name      = resourceName,
                         Labels    = new InputMap<string> {{"tier", "web"}}
                     },
                     Spec = new PodMonitorSpecArgs {
@@ -44,18 +44,18 @@ namespace Ubiquitous.AutoDevOps.Stack.Addons {
             );
 
         public static ServiceMonitor CreateServiceMonitor(
-            DeploySettings     deploySettings,
+            ResourceName       resourceName,
             PrometheusSettings prometheusSettings,
             Service            service,
             Namespace          kubeNamespace,
             ProviderResource?  providerResource = null
         )
             => new(
-                deploySettings.PulumiName("serviceMonitor"),
+                resourceName.AsPulumiName(),
                 new ServiceMonitorArgs {
                     Metadata = new ObjectMetaArgs {
                         Namespace = kubeNamespace.Metadata.Apply(x => x.Name),
-                        Name      = deploySettings.ResourceName,
+                        Name      = resourceName,
                         Labels    = new InputMap<string> {{"tier", "web"}}
                     },
                     Spec = new ServiceMonitorSpecArgs {
