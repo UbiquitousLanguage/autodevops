@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Threading.Tasks;
+using Pulumi.Automation;
 using Serilog;
 using Ubiquitous.AutoDevOps.Deployments;
 
@@ -21,7 +23,10 @@ namespace Ubiquitous.AutoDevOps.Commands {
 
             async Task<int> DeployStack(TOptions options) {
                 try {
-                    return await stackDeployment.DeployStack(configuration, options);
+                    var result    = await stackDeployment.DeployStack(configuration, options);
+                    var artefacts = new Artefacts(result);
+                    await artefacts.Save(Path.Join(Directory.GetCurrentDirectory(), "pulumi.txt"));
+                    return result.UpdateState == UpdateState.Succeeded ? 0 : -1;
                 }
                 catch (Exception e) {
                     Log.Error(e, "Deployment failed: {Message}", e.Message);

@@ -6,7 +6,7 @@ using static Serilog.Log;
 
 namespace Ubiquitous.AutoDevOps.Deployments {
     public class DefaultDeployment<T> : IStackDeployment<T> where T : IDeploymentOptions {
-        public async Task<int> DeployStack(IStackConfiguration<T> configuration, T options) {
+        public async Task<CommandResult> DeployStack(IStackConfiguration<T> configuration, T options) {
             var currentDir = Directory.GetCurrentDirectory();
 
             Information("Starting with {Name} {Stack} in {CurrentDir}", options.Name, options.Stack, currentDir);
@@ -36,13 +36,20 @@ namespace Ubiquitous.AutoDevOps.Deployments {
             if (options.Preview) {
                 Information("Executing preview for stack {Stack}", options.Stack);
 
-                 await appStack.PreviewAsync(
+                var previewResult = await appStack.PreviewAsync(
                     new PreviewOptions {
                         OnStandardOutput = Information,
                         OnStandardError  = Error
                     }
                 );
-                 return 0;
+
+                return new CommandResult(
+                    UpdateKind.Preview,
+                    UpdateState.Succeeded,
+                    previewResult.StandardOutput,
+                    previewResult.StandardError,
+                    previewResult.ChangeSummary
+                );
             }
 
             Information("Deploying stack {Stack}", options.Stack);
@@ -59,7 +66,13 @@ namespace Ubiquitous.AutoDevOps.Deployments {
                 Information("Environment URL: {EnvironmentUrl}", Env.EnvironmentUrl);
             }
 
-            return result.Summary.Result == UpdateState.Succeeded ? 0 : -1;
+            return new CommandResult(
+                result.Summary.Kind,
+                result.Summary.Result,
+                result.StandardOutput,
+                result.StandardError,
+                result.Summary.ResourceChanges
+            );
         }
     }
 }
