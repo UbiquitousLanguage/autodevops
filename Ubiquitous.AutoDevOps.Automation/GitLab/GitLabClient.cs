@@ -40,7 +40,7 @@ namespace Ubiquitous.AutoDevOps.GitLab {
 
             var resource = $"{_baseUrl}/projects/{projectId}/merge_requests/{mrIid}/notes";
 
-            var note     = new NewNote($"```json\r\n{content}\r\n```");
+            var note     = new NewNote(content);
             var response = await _httpClient.PostAsJsonAsync(resource, note, SerializerOptions);
             Log.Information("Result: {Code} {Reason}", response.StatusCode, response.ReasonPhrase);
         }

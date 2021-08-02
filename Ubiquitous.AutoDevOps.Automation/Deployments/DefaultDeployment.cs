@@ -96,9 +96,12 @@ namespace Ubiquitous.AutoDevOps.Deployments {
                 .Export();
 
             var result = new StringBuilder();
+            result.AppendLine("# Stack update preview");
             result.AppendLine(linkLine);
             result.AppendLine();
+            result.AppendLine("```diff");
             result.Append(sb);
+            result.AppendLine("```");
 
             var gitLabClient = GitLabClient.Create();
 
