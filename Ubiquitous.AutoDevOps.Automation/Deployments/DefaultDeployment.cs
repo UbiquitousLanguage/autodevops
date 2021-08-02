@@ -40,7 +40,8 @@ namespace Ubiquitous.AutoDevOps.Deployments {
                 var previewResult = await appStack.PreviewAsync(
                     new PreviewOptions {
                         OnStandardOutput = Information,
-                        OnStandardError  = Error
+                        OnStandardError  = Error,
+                        Diff = true
                     }
                 );
 
