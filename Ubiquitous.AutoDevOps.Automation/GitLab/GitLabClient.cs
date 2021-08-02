@@ -3,12 +3,14 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Serilog;
 using Ubiquitous.AutoDevOps.Stack;
 
 namespace Ubiquitous.AutoDevOps.GitLab {
     class GitLabClient {
         readonly HttpClient            _httpClient;
-        readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
+        
+        static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
         public static GitLabClient? Create() {
             var baseUrl = GetEnv("CI_API_V4_URL");
@@ -24,13 +26,19 @@ namespace Ubiquitous.AutoDevOps.GitLab {
 
         public async Task AddMergeRequestNote(string content) {
             var projectId = GetEnv("CI_MERGE_REQUEST_PROJECT_ID");
-            if (projectId == null) return;
 
+            if (projectId == null) {
+                Log.Information("Merge request project id not defined");
+                return;
+            }
+
+            Log.Information("Adding a note to the merge request");
             var mrIid = GetEnv("CI_MERGE_REQUEST_IID")!;
 
             var resource = $"projects/{projectId}/merge_requests/{mrIid}/notes";
             var note     = new NewNote(content);
-            await _httpClient.PostAsJsonAsync(resource, note, _serializerOptions);
+            var response = await _httpClient.PostAsJsonAsync(resource, note, SerializerOptions);
+            Log.Information("Result: {Code} {Reason}", response.StatusCode, response.ReasonPhrase);
         }
 
         static string? GetEnv(string varName) => Environment.GetEnvironmentVariable(varName);

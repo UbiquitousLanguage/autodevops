@@ -46,8 +46,13 @@ namespace Ubiquitous.AutoDevOps.Deployments {
 
                 var gitLabClient = GitLabClient.Create();
 
-                if (gitLabClient != null)
+                if (gitLabClient != null) {
+                    Information("GitLab API URL is defined");
                     await gitLabClient.AddMergeRequestNote(previewResult.StandardOutput);
+                }
+                else {
+                    Information("GitLab API URL is not defined");
+                }
 
                 return new CommandResult(
                     UpdateKind.Preview,
