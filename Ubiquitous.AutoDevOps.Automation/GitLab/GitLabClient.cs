@@ -25,17 +25,17 @@ namespace Ubiquitous.AutoDevOps.GitLab {
         }
 
         public async Task AddMergeRequestNote(string content) {
-            var projectId = GetEnv("CI_MERGE_REQUEST_PROJECT_ID");
+            var projectId = GetEnv("CI_PROJECT_ID");
+            var mrIid = GetEnv("CI_MERGE_REQUEST_IID");
 
-            if (projectId == null) {
-                Log.Information("Merge request project id not defined");
+            if (projectId == null || mrIid == null) {
+                Log.Information("Project or merge request id not defined");
                 return;
             }
 
             Log.Information("Adding a note to the merge request");
-            var mrIid = GetEnv("CI_MERGE_REQUEST_IID")!;
 
-            var resource = $"projects/{projectId}/merge_requests/{mrIid}/notes";
+            var resource = $"/projects/{projectId}/merge_requests/{mrIid}/notes";
             var note     = new NewNote(content);
             var response = await _httpClient.PostAsJsonAsync(resource, note, SerializerOptions);
             Log.Information("Result: {Code} {Reason}", response.StatusCode, response.ReasonPhrase);
