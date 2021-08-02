@@ -36,6 +36,10 @@ namespace Ubiquitous.AutoDevOps.GitLab {
             Log.Information("Adding a note to the merge request");
 
             var resource = $"/projects/{projectId}/merge_requests/{mrIid}/notes";
+            
+            Log.Information("API endpoint {Endpoint}", _httpClient.BaseAddress);
+            Log.Information("Calling {Resource}", resource);
+            
             var note     = new NewNote(content);
             var response = await _httpClient.PostAsJsonAsync(resource, note, SerializerOptions);
             Log.Information("Result: {Code} {Reason}", response.StatusCode, response.ReasonPhrase);
