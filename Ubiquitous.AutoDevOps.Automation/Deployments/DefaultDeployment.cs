@@ -89,18 +89,20 @@ namespace Ubiquitous.AutoDevOps.Deployments {
                 .Select(x => x.AsRow())
                 .ToList();
 
-            var sb = ConsoleTableBuilder
+            var builder = ConsoleTableBuilder
                 .From(tableData)
                 .WithColumn("", "Name", "Type", "Operation", "Diff")
-                .WithFormat(ConsoleTableBuilderFormat.Minimal)
-                .Export();
+                .WithCharMapDefinition()
+                .WithPaddingLeft(string.Empty)
+                .WithPaddingLeft(" ");
+                // .WithFormat(ConsoleTableBuilderFormat.Minimal)
 
             var result = new StringBuilder();
             result.AppendLine("# Stack update preview");
             result.AppendLine(linkLine);
             result.AppendLine();
             result.AppendLine("```diff");
-            result.Append(sb);
+            result.Append(builder.Export());
             result.AppendLine("```");
 
             var gitLabClient = GitLabClient.Create();
