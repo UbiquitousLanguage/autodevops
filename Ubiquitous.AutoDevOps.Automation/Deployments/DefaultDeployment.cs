@@ -1,7 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ConsoleTableExt;
 using Pulumi.Automation;
 using Pulumi.Automation.Events;
 using Ubiquitous.AutoDevOps.GitLab;
@@ -67,7 +72,7 @@ namespace Ubiquitous.AutoDevOps.Deployments {
         static async Task<CommandResult> Preview(WorkspaceStack appStack, T options) {
             Information("Executing preview for stack {Stack}", options.Stack);
 
-            var events = new List<EngineEvent>();
+            var events = new List<ResourcePreview>();
 
             var previewResult = await appStack.PreviewAsync(
                 new PreviewOptions {
@@ -76,12 +81,30 @@ namespace Ubiquitous.AutoDevOps.Deployments {
                     OnEvent          = OnEvent
                 }
             );
+            var lines    = Regex.Split(previewResult.StandardOutput, "\r\n|\r|\n");
+            var linkLine = lines.FirstOrDefault(x => x.StartsWith("View Live:"));
+
+            var tableData = events
+                .Select(x => x.AsRow())
+                .Where(x => x != null)
+                .ToList();
+
+            var sb = ConsoleTableBuilder
+                .From(tableData)
+                .WithColumn("", "Name", "Type", "Operation", "Diff")
+                .WithFormat(ConsoleTableBuilderFormat.Minimal)
+                .Export();
+
+            var result = new StringBuilder();
+            result.AppendLine(linkLine);
+            result.AppendLine();
+            result.Append(sb);
 
             var gitLabClient = GitLabClient.Create();
 
             if (gitLabClient != null) {
                 Information("GitLab API URL and credentials are defined");
-                // await gitLabClient.AddMergeRequestNote(previewResult.StandardOutput);
+                await gitLabClient.AddMergeRequestNote(result.ToString());
             }
             else {
                 Information("CI_API_V4_URL or GITLAB_API_TOKEN variable is not defined");
@@ -90,13 +113,44 @@ namespace Ubiquitous.AutoDevOps.Deployments {
             return new CommandResult(
                 UpdateKind.Preview,
                 UpdateState.Succeeded,
-                // previewResult.StandardOutput,
-                JsonSerializer.Serialize(events),
+                previewResult.StandardOutput,
                 previewResult.StandardError,
                 previewResult.ChangeSummary
             );
 
-            void OnEvent(EngineEvent engineEvent) => events.Add(engineEvent);
+            void OnEvent(EngineEvent engineEvent) {
+                if (engineEvent.SummaryEvent != null) {
+                    // Add summary here
+                    return;
+                }
+
+                var outputEvent = engineEvent.ResourceOutputsEvent;
+                if (outputEvent == null) return;
+                events.Add(ResourcePreview.FromOutputEvent(outputEvent));
+            }
+        }
+
+        record ResourcePreview(OperationType Op, string? Name, string Type, string[]? Diffs) {
+            public static ResourcePreview FromOutputEvent(ResourceOutputsEvent evt)
+                => new(evt.Metadata.Op, evt.Metadata.Old?.Id ?? evt.Metadata.New?.Id, evt.Metadata.Type, evt.Metadata
+                    .Diffs?.ToArray());
+
+            public List<object>? AsRow() {
+                return Name == null
+                    ? null
+                    : new List<object> {OpString(Op), Name, Type, Op.ToString(), Diffs == null ? "" : string.Join(", ", Diffs)};
+
+                string OpString(OperationType op)
+                    => op switch {
+                        OperationType.Create            => "+",
+                        OperationType.Delete            => "-",
+                        OperationType.Update            => "~",
+                        OperationType.Replace           => "+-",
+                        OperationType.CreateReplacement => "++",
+                        OperationType.DeleteReplaced    => "--",
+                        _                               => ""
+                    };
+            }
         }
     }
 }
