@@ -74,6 +74,8 @@ namespace Ubiquitous.AutoDevOps.Deployments {
 
             var events = new List<ResourcePreview>();
 
+            SummaryEvent summary = null;
+
             var previewResult = await appStack.PreviewAsync(
                 new PreviewOptions {
                     OnStandardOutput = Information,
@@ -100,9 +102,17 @@ namespace Ubiquitous.AutoDevOps.Deployments {
             result.AppendLine("# Stack update preview");
             result.AppendLine(linkLine);
             result.AppendLine();
+            result.AppendLine("## Changes");
             result.AppendLine("```diff");
             result.Append(builder.Export());
             result.AppendLine("```");
+
+            if (summary != null) {
+                result.AppendLine("## Summary");
+                result.AppendLine("```diff");
+                result.Append(AsSummary());
+                result.AppendLine("```");
+            }
 
             var gitLabClient = GitLabClient.Create();
 
@@ -124,13 +134,29 @@ namespace Ubiquitous.AutoDevOps.Deployments {
 
             void OnEvent(EngineEvent engineEvent) {
                 if (engineEvent.SummaryEvent != null) {
-                    // Add summary here
+                    summary = engineEvent.SummaryEvent;
                     return;
                 }
 
                 var outputEvent = engineEvent.ResourceOutputsEvent;
                 if (outputEvent == null) return;
                 events.Add(ResourcePreview.FromOutputEvent(outputEvent));
+            }
+
+            StringBuilder AsSummary() {
+                var sb = new StringBuilder();
+                AddSummaryForOp(sb, OperationType.Create);
+                AddSummaryForOp(sb, OperationType.Update);
+                AddSummaryForOp(sb, OperationType.Delete);
+                AddSummaryForOp(sb, OperationType.Replace);
+                AddSummaryForOp(sb, OperationType.Refresh);
+                AddSummaryForOp(sb, OperationType.Same);
+                return sb;
+            }
+
+            void AddSummaryForOp(StringBuilder sb, OperationType operationType) {
+                if (summary.ResourceChanges.TryGetValue(operationType, out var changes))
+                    sb.AppendLine($"{OpString(operationType)} {operationType.ToString()}: {changes}");
             }
         }
 
@@ -149,15 +175,6 @@ namespace Ubiquitous.AutoDevOps.Deployments {
 
             public List<object> AsRow() => new() {OpString(Op), Name, Type, Op.ToString(), Diffs};
 
-            static string OpString(OperationType op)
-                => op switch {
-                    OperationType.Create            => "+",
-                    OperationType.Delete            => "-",
-                    OperationType.Update            => "~",
-                    OperationType.Replace           => "+-",
-                    _                               => ""
-                };
-
             OperationType Op    { get; }
             string        Name  { get; }
             string        Type  { get; }
@@ -165,5 +182,14 @@ namespace Ubiquitous.AutoDevOps.Deployments {
 
             public bool Show => !OpString(Op).IsEmpty();
         }
+
+        static string OpString(OperationType op)
+            => op switch {
+                OperationType.Create  => "+",
+                OperationType.Delete  => "-",
+                OperationType.Update  => "~",
+                OperationType.Replace => "+-",
+                _                     => ""
+            };
     }
 }
