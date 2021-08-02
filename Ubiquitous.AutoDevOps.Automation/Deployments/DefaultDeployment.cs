@@ -47,11 +47,11 @@ namespace Ubiquitous.AutoDevOps.Deployments {
                 var gitLabClient = GitLabClient.Create();
 
                 if (gitLabClient != null) {
-                    Information("GitLab API URL is defined");
+                    Information("GitLab API URL and credentials are defined");
                     await gitLabClient.AddMergeRequestNote(previewResult.StandardOutput);
                 }
                 else {
-                    Information("GitLab API URL is not defined");
+                    Information("CI_API_V4_URL or GITLAB_API_TOKEN variable is not defined");
                 }
 
                 return new CommandResult(

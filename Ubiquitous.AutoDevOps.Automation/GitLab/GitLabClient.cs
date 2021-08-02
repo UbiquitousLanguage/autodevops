@@ -8,25 +8,26 @@ using Ubiquitous.AutoDevOps.Stack;
 
 namespace Ubiquitous.AutoDevOps.GitLab {
     class GitLabClient {
-        readonly HttpClient            _httpClient;
-        
+        readonly HttpClient _httpClient;
+
         static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
         public static GitLabClient? Create() {
             var baseUrl = GetEnv("CI_API_V4_URL");
-            return baseUrl.IsEmpty() ? null : new GitLabClient(baseUrl!);
+            var token   = GetEnv("GITLAB_API_TOKEN");
+            return baseUrl.IsEmpty() || token.IsEmpty() ? null : new GitLabClient(baseUrl!, token!);
         }
 
-        GitLabClient(string baseUrl) {
+        GitLabClient(string baseUrl, string token) {
             _httpClient = new HttpClient {
                 BaseAddress           = new Uri(baseUrl),
-                DefaultRequestHeaders = {{"PRIVATE-TOKEN", GetEnv("CI_JOB_TOKEN")}}
+                DefaultRequestHeaders = {{"PRIVATE-TOKEN", token}}
             };
         }
 
         public async Task AddMergeRequestNote(string content) {
             var projectId = GetEnv("CI_PROJECT_ID");
-            var mrIid = GetEnv("CI_MERGE_REQUEST_IID");
+            var mrIid     = GetEnv("CI_MERGE_REQUEST_IID");
 
             if (projectId == null || mrIid == null) {
                 Log.Information("Project or merge request id not defined");
@@ -36,10 +37,7 @@ namespace Ubiquitous.AutoDevOps.GitLab {
             Log.Information("Adding a note to the merge request");
 
             var resource = $"/projects/{projectId}/merge_requests/{mrIid}/notes";
-            
-            Log.Information("API endpoint {Endpoint}", _httpClient.BaseAddress);
-            Log.Information("Calling {Resource}", resource);
-            
+
             var note     = new NewNote(content);
             var response = await _httpClient.PostAsJsonAsync(resource, note, SerializerOptions);
             Log.Information("Result: {Code} {Reason}", response.StatusCode, response.ReasonPhrase);
