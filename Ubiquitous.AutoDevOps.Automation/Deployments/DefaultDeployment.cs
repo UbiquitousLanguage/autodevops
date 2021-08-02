@@ -85,8 +85,8 @@ namespace Ubiquitous.AutoDevOps.Deployments {
             var linkLine = lines.FirstOrDefault(x => x.StartsWith("View Live:"));
 
             var tableData = events
+                .Where(x => x.Show)
                 .Select(x => x.AsRow())
-                .Where(x => x != null)
                 .ToList();
 
             var sb = ConsoleTableBuilder
@@ -133,27 +133,36 @@ namespace Ubiquitous.AutoDevOps.Deployments {
             }
         }
 
-        record ResourcePreview(OperationType Op, string? Name, string Type, string[]? Diffs) {
-            public static ResourcePreview FromOutputEvent(ResourceOutputsEvent evt)
-                => new(evt.Metadata.Op, evt.Metadata.Old?.Id ?? evt.Metadata.New?.Id, evt.Metadata.Type, evt.Metadata
-                    .Diffs?.ToArray());
-
-            public List<object>? AsRow() {
-                return Name == null
-                    ? null
-                    : new List<object> {OpString(Op), Name, Type, Op.ToString(), Diffs == null ? "" : string.Join(", ", Diffs)};
-
-                string OpString(OperationType op)
-                    => op switch {
-                        OperationType.Create            => "+",
-                        OperationType.Delete            => "-",
-                        OperationType.Update            => "~",
-                        OperationType.Replace           => "+-",
-                        OperationType.CreateReplacement => "++",
-                        OperationType.DeleteReplaced    => "--",
-                        _                               => ""
-                    };
+        record ResourcePreview {
+            ResourcePreview(OperationType op, string urn, string[]? diffs) {
+                Op    = op;
+                Diffs = diffs == null ? "" : string.Join(", ", diffs);
+                var parts = urn.Split("::");
+                Type = parts[2];
+                Name = parts[3];
             }
+
+            public static ResourcePreview FromOutputEvent(ResourceOutputsEvent evt) {
+                return new(evt.Metadata.Op, evt.Metadata.Urn, evt.Metadata.Diffs?.ToArray());
+            }
+
+            public List<object> AsRow() => new() {OpString(Op), Name, Type, Op.ToString(), Diffs};
+
+            static string OpString(OperationType op)
+                => op switch {
+                    OperationType.Create            => "+",
+                    OperationType.Delete            => "-",
+                    OperationType.Update            => "~",
+                    OperationType.Replace           => "+-",
+                    _                               => ""
+                };
+
+            OperationType Op    { get; }
+            string        Name  { get; }
+            string        Type  { get; }
+            string        Diffs { get; }
+
+            public bool Show => !OpString(Op).IsEmpty();
         }
     }
 }
