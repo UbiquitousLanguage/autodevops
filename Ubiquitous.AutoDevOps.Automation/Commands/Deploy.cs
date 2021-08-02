@@ -23,10 +23,10 @@ namespace Ubiquitous.AutoDevOps.Commands {
 
             async Task<int> DeployStack(TOptions options) {
                 try {
-                    var result    = await stackDeployment.DeployStack(configuration, options);
+                    var result = await stackDeployment.DeployStack(configuration, options);
 
                     Log.Information("Stack {UpdateKind} {UpdateState}", result.UpdateKind, result.UpdateState);
-                    
+
                     var artefacts = new Artefacts(result);
                     await artefacts.Save(Path.Join(Directory.GetCurrentDirectory(), "pulumi.txt"));
                     return result.UpdateState == UpdateState.Succeeded ? 0 : -1;

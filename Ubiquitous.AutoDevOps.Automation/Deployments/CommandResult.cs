@@ -12,6 +12,8 @@ namespace Ubiquitous.AutoDevOps.Deployments {
             string                                    standardError,
             IImmutableDictionary<OperationType, int>? changeSummary
         ) {
+            UpdateState    = updateState;
+            UpdateKind     = updateKind;
             StandardOutput = standardOutput;
             StandardError  = standardError;
             ChangeSummary  = changeSummary;

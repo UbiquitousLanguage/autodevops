@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Pulumi.Automation;
+using Ubiquitous.AutoDevOps.GitLab;
 using Ubiquitous.AutoDevOps.Stack;
 using static Serilog.Log;
 
@@ -38,11 +39,15 @@ namespace Ubiquitous.AutoDevOps.Deployments {
 
                 var previewResult = await appStack.PreviewAsync(
                     new PreviewOptions {
-                        Diff             = true,
                         OnStandardOutput = Information,
                         OnStandardError  = Error
                     }
                 );
+
+                var gitLabClient = GitLabClient.Create();
+
+                if (gitLabClient != null)
+                    await gitLabClient.AddMergeRequestNote(previewResult.StandardOutput);
 
                 return new CommandResult(
                     UpdateKind.Preview,
