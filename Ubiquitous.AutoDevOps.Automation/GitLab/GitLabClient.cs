@@ -8,19 +8,21 @@ using Ubiquitous.AutoDevOps.Stack;
 
 namespace Ubiquitous.AutoDevOps.GitLab {
     class GitLabClient {
-        readonly HttpClient _httpClient;
+        readonly string     _baseUrl;
+        readonly         HttpClient _httpClient;
 
         static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
         public static GitLabClient? Create() {
             var baseUrl = GetEnv("CI_API_V4_URL");
             var token   = GetEnv("GITLAB_API_TOKEN");
-            return baseUrl.IsEmpty() || token.IsEmpty() ? null : new GitLabClient(baseUrl! + "/", token!);
+            return baseUrl.IsEmpty() || token.IsEmpty() ? null : new GitLabClient(baseUrl!, token!);
         }
 
         GitLabClient(string baseUrl, string token) {
+            _baseUrl = baseUrl;
+
             _httpClient = new HttpClient {
-                BaseAddress           = new Uri(baseUrl),
                 DefaultRequestHeaders = {{"PRIVATE-TOKEN", token}}
             };
         }
@@ -36,7 +38,7 @@ namespace Ubiquitous.AutoDevOps.GitLab {
 
             Log.Information("Adding a note to the merge request");
 
-            var resource = $"projects/{projectId}/merge_requests/{mrIid}/notes";
+            var resource = $"{_baseUrl}/projects/{projectId}/merge_requests/{mrIid}/notes";
 
             var note     = new NewNote(content);
             var response = await _httpClient.PostAsJsonAsync(resource, note, SerializerOptions);
