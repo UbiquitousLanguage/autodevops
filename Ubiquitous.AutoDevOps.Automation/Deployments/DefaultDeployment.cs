@@ -38,6 +38,7 @@ namespace Ubiquitous.AutoDevOps.Deployments {
 
                 var previewResult = await appStack.PreviewAsync(
                     new PreviewOptions {
+                        Diff             = true,
                         OnStandardOutput = Information,
                         OnStandardError  = Error
                     }
