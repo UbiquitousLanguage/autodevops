@@ -94,8 +94,7 @@ namespace Ubiquitous.AutoDevOps.Deployments {
                 .WithColumn("", "Name", "Type", "Operation", "Diff")
                 .WithCharMapDefinition()
                 .WithPaddingLeft(string.Empty)
-                .WithPaddingLeft(" ");
-                // .WithFormat(ConsoleTableBuilderFormat.Minimal)
+                .WithPaddingRight(" ");
 
             var result = new StringBuilder();
             result.AppendLine("# Stack update preview");
