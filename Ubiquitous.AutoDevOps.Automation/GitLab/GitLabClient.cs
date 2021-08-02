@@ -15,8 +15,7 @@ namespace Ubiquitous.AutoDevOps.GitLab {
 
         public static GitLabClient? Create() {
             var baseUrl = GetEnv("CI_API_V4_URL");
-            // var token   = GetEnv("GITLAB_API_TOKEN");
-            var token   = GetEnv("CI_JOB_TOKEN");
+            var token   = GetEnv("GITLAB_API_TOKEN");
             return baseUrl.IsEmpty() || token.IsEmpty() ? null : new GitLabClient(baseUrl!, token!);
         }
 

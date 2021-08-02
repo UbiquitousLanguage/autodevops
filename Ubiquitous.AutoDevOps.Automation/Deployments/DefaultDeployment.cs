@@ -1,6 +1,9 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Pulumi.Automation;
+using Pulumi.Automation.Events;
 using Ubiquitous.AutoDevOps.GitLab;
 using Ubiquitous.AutoDevOps.Stack;
 using static Serilog.Log;
@@ -35,33 +38,7 @@ namespace Ubiquitous.AutoDevOps.Deployments {
             await configuration.InstallPlugins(appStack.Workspace);
 
             if (options.Preview) {
-                Information("Executing preview for stack {Stack}", options.Stack);
-
-                var previewResult = await appStack.PreviewAsync(
-                    new PreviewOptions {
-                        OnStandardOutput = Information,
-                        OnStandardError  = Error,
-                        Diff = true
-                    }
-                );
-
-                var gitLabClient = GitLabClient.Create();
-
-                if (gitLabClient != null) {
-                    Information("GitLab API URL and credentials are defined");
-                    await gitLabClient.AddMergeRequestNote(previewResult.StandardOutput);
-                }
-                else {
-                    Information("CI_API_V4_URL or GITLAB_API_TOKEN variable is not defined");
-                }
-
-                return new CommandResult(
-                    UpdateKind.Preview,
-                    UpdateState.Succeeded,
-                    previewResult.StandardOutput,
-                    previewResult.StandardError,
-                    previewResult.ChangeSummary
-                );
+                return await Preview(appStack, options);
             }
 
             Information("Deploying stack {Stack}", options.Stack);
@@ -85,6 +62,41 @@ namespace Ubiquitous.AutoDevOps.Deployments {
                 result.StandardError,
                 result.Summary.ResourceChanges
             );
+        }
+
+        static async Task<CommandResult> Preview(WorkspaceStack appStack, T options) {
+            Information("Executing preview for stack {Stack}", options.Stack);
+
+            var events = new List<EngineEvent>();
+
+            var previewResult = await appStack.PreviewAsync(
+                new PreviewOptions {
+                    OnStandardOutput = Information,
+                    OnStandardError  = Error,
+                    OnEvent          = OnEvent
+                }
+            );
+
+            var gitLabClient = GitLabClient.Create();
+
+            if (gitLabClient != null) {
+                Information("GitLab API URL and credentials are defined");
+                // await gitLabClient.AddMergeRequestNote(previewResult.StandardOutput);
+            }
+            else {
+                Information("CI_API_V4_URL or GITLAB_API_TOKEN variable is not defined");
+            }
+
+            return new CommandResult(
+                UpdateKind.Preview,
+                UpdateState.Succeeded,
+                // previewResult.StandardOutput,
+                JsonSerializer.Serialize(events),
+                previewResult.StandardError,
+                previewResult.ChangeSummary
+            );
+
+            void OnEvent(EngineEvent engineEvent) => events.Add(engineEvent);
         }
     }
 }
