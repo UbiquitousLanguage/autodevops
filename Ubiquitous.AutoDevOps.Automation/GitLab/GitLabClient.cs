@@ -9,13 +9,14 @@ using Ubiquitous.AutoDevOps.Stack;
 namespace Ubiquitous.AutoDevOps.GitLab {
     class GitLabClient {
         readonly string     _baseUrl;
-        readonly         HttpClient _httpClient;
+        readonly HttpClient _httpClient;
 
         static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
         public static GitLabClient? Create() {
             var baseUrl = GetEnv("CI_API_V4_URL");
-            var token   = GetEnv("GITLAB_API_TOKEN");
+            // var token   = GetEnv("GITLAB_API_TOKEN");
+            var token   = GetEnv("CI_JOB_TOKEN");
             return baseUrl.IsEmpty() || token.IsEmpty() ? null : new GitLabClient(baseUrl!, token!);
         }
 
