@@ -1,40 +1,38 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.IO;
-using System.Threading.Tasks;
 using Ubiquitous.AutoDevOps.Stack;
 using Pulumi.Automation;
 using static Serilog.Log;
 
-namespace Ubiquitous.AutoDevOps.Commands {
-    public class Destroy : Command {
-        public Destroy() : base("destroy", "Destroy the stack") {
-            Handler = CommandHandler.Create<string>(DestroyStack);
-        }
+namespace Ubiquitous.AutoDevOps.Commands;
 
-        static async Task<int> DestroyStack(string stack) {
-            var projectName = Env.ProjectName;
-            var currentDir  = Directory.GetCurrentDirectory();
+public class Destroy : Command {
+    public Destroy() : base("destroy", "Destroy the stack") {
+        Handler = CommandHandler.Create<string>(DestroyStack);
+    }
 
-            using var workspace = await LocalWorkspace.CreateAsync(
-                new LocalWorkspaceOptions {
-                    Program         = PulumiFn.Create<DefaultStack>(),
-                    ProjectSettings = new ProjectSettings(projectName, ProjectRuntimeName.Dotnet),
-                    WorkDir         = currentDir
-                }
-            );
-            var appStack = await WorkspaceStack.SelectAsync(stack, workspace);
+    static async Task<int> DestroyStack(string stack) {
+        var projectName = Env.ProjectName;
+        var currentDir  = Directory.GetCurrentDirectory();
 
-            Information("Destroying {Stack}", stack);
+        using var workspace = await LocalWorkspace.CreateAsync(
+            new LocalWorkspaceOptions {
+                Program         = PulumiFn.Create<DefaultStack>(),
+                ProjectSettings = new ProjectSettings(projectName, ProjectRuntimeName.Dotnet),
+                WorkDir         = currentDir
+            }
+        );
+        var appStack = await WorkspaceStack.SelectAsync(stack, workspace);
 
-            var result = await appStack.DestroyAsync(
-                new DestroyOptions {
-                    OnStandardOutput = Information,
-                    OnStandardError  = Error
-                }
-            );
+        Information("Destroying {Stack}", stack);
 
-            return result.Summary.Result == UpdateState.Succeeded ? 0 : -1;
-        }
+        var result = await appStack.DestroyAsync(
+            new DestroyOptions {
+                OnStandardOutput = Information,
+                OnStandardError  = Error
+            }
+        );
+
+        return result.Summary.Result == UpdateState.Succeeded ? 0 : -1;
     }
 }

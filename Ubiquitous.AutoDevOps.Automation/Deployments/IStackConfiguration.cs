@@ -1,13 +1,12 @@
-using System.Threading.Tasks;
 using Pulumi.Automation;
 using static Ubiquitous.AutoDevOps.Stack.AutoDevOpsSettings;
 
-namespace Ubiquitous.AutoDevOps.Deployments {
-    public interface IStackConfiguration<T> where T : IDeploymentOptions {
-        Task InstallPlugins(Workspace workspace);
+namespace Ubiquitous.AutoDevOps.Deployments; 
 
-        Task ConfigureStack(WorkspaceStack appStack, AppSettings appSettings, T options);
+public interface IStackConfiguration<T> where T : IDeploymentOptions {
+    Task InstallPlugins(Workspace workspace);
 
-        LocalWorkspaceOptions GetStackArgs(string name, string stack, string currentDir);
-    }
+    Task ConfigureStack(WorkspaceStack appStack, AppSettings appSettings, T options);
+
+    LocalWorkspaceOptions GetStackArgs(string name, string stack, string currentDir);
 }
