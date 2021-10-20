@@ -5,9 +5,9 @@
 
     <ItemGroup>
         <PackageReference Include="ConsoleTableExt" Version="3.1.9" />
-        <PackageReference Include="Pulumi.Automation" Version="3.14.0" />
+        <PackageReference Include="Pulumi.Automation" Version="3.15.0" />
         <PackageReference Include="Serilog" Version="2.10.0" />
-        <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
         <PackageReference Include="SerilogAnalyzer" Version="0.15.0" PrivateAssets="all" />
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21216.1" />
         <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
