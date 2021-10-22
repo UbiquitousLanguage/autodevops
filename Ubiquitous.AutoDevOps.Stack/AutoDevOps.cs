@@ -12,7 +12,7 @@ using Ingress = Pulumi.Kubernetes.Networking.V1.Ingress;
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable InvertIf
 
-namespace Ubiquitous.AutoDevOps.Stack; 
+namespace Ubiquitous.AutoDevOps.Stack;
 
 /// <summary>
 /// A set of Kubernetes resources, which closely replicate what
@@ -38,6 +38,7 @@ public class AutoDevOps {
     /// <param name="namespaceAnnotations">Optional: namespace annotations</param>
     /// <param name="deployExtras">Optional: use this to deploy other resources to the environment namespace,
     /// before the application is deployed.</param>
+    /// <param name="extraAppVars">Additional data for the application secret</param>
     /// <param name="provider">Optional: custom Kubernetes resource provider</param>
     public AutoDevOps(
         AutoDevOpsSettings          settings,
@@ -50,6 +51,7 @@ public class AutoDevOps {
         Dictionary<string, string>? ingressAnnotations   = null,
         Dictionary<string, string>? namespaceAnnotations = null,
         Action<Namespace>?          deployExtras         = null,
+        Dictionary<string, string>? extraAppVars         = null,
         ProviderResource?           provider             = null
     ) {
         var @namespace = KubeNamespace.Create(settings.Deploy.Namespace, namespaceAnnotations, provider);
@@ -64,20 +66,20 @@ public class AutoDevOps {
             : settings.Deploy.Replicas;
 
         if (replicas == 0) {
-            DeploymentResult = new Result {Namespace = @namespace};
+            DeploymentResult = new Result { Namespace = @namespace };
             return;
         }
-            
+
         ResourceName.SetBaseName(settings.Application.Name);
         PulumiName.SetBaseName(settings.Application.Name);
 
-        var appSecret = KubeSecret.CreateAppSecret(@namespace, "appsecret", settings, provider);
+        var appSecret = KubeSecret.CreateAppSecret(@namespace, "appsecret", settings, extraAppVars, provider);
 
         var deployment = KubeDeployment.Create(
             @namespace,
             "deployment",
             settings.Application,
-            settings.Deploy with {Replicas = replicas},
+            settings.Deploy with { Replicas = replicas },
             settings.GitLab,
             imagePullSecret,
             appSecret,

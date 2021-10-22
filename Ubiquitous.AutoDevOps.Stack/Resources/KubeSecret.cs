@@ -16,13 +16,15 @@ public static class KubeSecret {
     /// <param name="namespace">Namespace, where the secret should be created</param>
     /// <param name="resourceName">Resource name</param>
     /// <param name="settings">AutoDevOps settings</param>
+    /// <param name="extraData">Additional variables to add to the secret</param>
     /// <param name="providerResource">Optional: customer Kubernetes provider</param>
     /// <returns></returns>
     public static Secret? CreateAppSecret(
-        Namespace          @namespace,
-        ResourceName       resourceName,
-        AutoDevOpsSettings settings,
-        ProviderResource?  providerResource = null
+        Namespace                   @namespace,
+        ResourceName                resourceName,
+        AutoDevOpsSettings          settings,
+        Dictionary<string, string>? extraData = null,
+        ProviderResource?           providerResource = null
     ) {
         var env = GetEnvironmentVariables();
 
@@ -31,15 +33,21 @@ public static class KubeSecret {
 #pragma warning disable 8605
         foreach (DictionaryEntry entry in env) {
 #pragma warning restore 8605
-            var key = (string) entry.Key;
+            var key = (string)entry.Key;
 
             if (key.StartsWith("K8S_SECRET_") && entry.Value != null)
-                vars[key.Remove(0, 11)] = (string) entry.Value;
+                vars[key.Remove(0, 11)] = (string)entry.Value;
         }
 
         if (settings.Env != null) {
             foreach (var (name, value) in settings.Env) {
                 vars[name] = value;
+            }
+        }
+
+        if (extraData != null) {
+            foreach (var (key, value) in extraData) {
+                vars.Add(key, value);
             }
         }
 
@@ -52,7 +60,7 @@ public static class KubeSecret {
                 Type       = "opaque",
                 StringData = vars
             },
-            new CustomResourceOptions {Provider = providerResource}
+            new CustomResourceOptions { Provider = providerResource }
         );
     }
 
@@ -77,7 +85,7 @@ public static class KubeSecret {
                 Type       = "opaque",
                 StringData = variables
             },
-            new CustomResourceOptions {Provider = providerResource}
+            new CustomResourceOptions { Provider = providerResource }
         );
 
     /// <summary>
@@ -105,7 +113,7 @@ public static class KubeSecret {
             new SecretArgs {
                 Metadata = Meta.GetMeta(secretName, @namespace.GetName()),
                 Type     = "kubernetes.io/dockerconfigjson",
-                Data     = new InputMap<string> {{".dockerconfigjson", content}}
+                Data     = new InputMap<string> { { ".dockerconfigjson", content } }
             },
             new CustomResourceOptions {
                 Provider = providerResource
