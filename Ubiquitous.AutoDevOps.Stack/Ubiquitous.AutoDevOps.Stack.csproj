@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="Pulumi.Kubernetes" Version="3.8.2" />
+    <PackageReference Include="Pulumi.Kubernetes" Version="3.9.0" />
   </ItemGroup>
 
   <ItemGroup>

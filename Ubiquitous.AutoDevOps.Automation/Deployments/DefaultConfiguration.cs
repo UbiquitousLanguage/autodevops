@@ -6,7 +6,7 @@ namespace Ubiquitous.AutoDevOps.Deployments;
 
 public class DefaultConfiguration : IStackConfiguration<DefaultOptions> {
     public Task InstallPlugins(Workspace workspace)
-        => workspace.InstallPluginAsync("kubernetes", "v3.5.1");
+        => workspace.InstallPluginAsync("kubernetes", "v3.9.0");
 
     public async Task ConfigureStack(
         WorkspaceStack                 appStack,
