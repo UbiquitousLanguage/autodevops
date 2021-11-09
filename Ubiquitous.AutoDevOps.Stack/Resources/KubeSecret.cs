@@ -47,7 +47,7 @@ public static class KubeSecret {
 
         if (extraData != null) {
             foreach (var (key, value) in extraData) {
-                vars.Add(key, value);
+                vars.TryAdd(key, value);
             }
         }
 
