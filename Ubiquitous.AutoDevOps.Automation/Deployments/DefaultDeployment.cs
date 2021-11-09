@@ -28,11 +28,11 @@ public class DefaultDeployment<T> : IStackDeployment<T> where T : IDeploymentOpt
         );
         await configuration.ConfigureStack(appStack, appSettings, options);
 
-        Information("Refreshing stack {Stack}", options.Stack);
-        await appStack.RefreshAsync();
-
         Information("Installing plugins");
         await configuration.InstallPlugins(appStack.Workspace);
+        
+        Information("Refreshing stack {Stack}", options.Stack);
+        await appStack.RefreshAsync();
 
         if (options.Preview) {
             return await Preview(appStack, options);
