@@ -23,7 +23,7 @@ public static class KubeSecret {
         Namespace                   @namespace,
         ResourceName                resourceName,
         AutoDevOpsSettings          settings,
-        Dictionary<string, string>? extraData = null,
+        Dictionary<string, string>? extraData        = null,
         ProviderResource?           providerResource = null
     ) {
         var env = GetEnvironmentVariables();
@@ -60,7 +60,7 @@ public static class KubeSecret {
                 Type       = "opaque",
                 StringData = vars
             },
-            new CustomResourceOptions { Provider = providerResource }
+            providerResource.AsResourceOptions()
         );
     }
 
@@ -85,7 +85,7 @@ public static class KubeSecret {
                 Type       = "opaque",
                 StringData = variables
             },
-            new CustomResourceOptions { Provider = providerResource }
+            providerResource.AsResourceOptions()
         );
 
     /// <summary>
@@ -115,9 +115,7 @@ public static class KubeSecret {
                 Type     = "kubernetes.io/dockerconfigjson",
                 Data     = new InputMap<string> { { ".dockerconfigjson", content } }
             },
-            new CustomResourceOptions {
-                Provider = providerResource
-            }
+            providerResource.AsResourceOptions()
         );
     }
 }

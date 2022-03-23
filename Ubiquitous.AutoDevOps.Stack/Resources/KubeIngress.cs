@@ -58,10 +58,6 @@ public static class KubeIngress {
             }
         };
 
-        return new Ingress(
-            resourceName.AsPulumiName(),
-            ingress,
-            new CustomResourceOptions { Provider = providerResource }
-        );
+        return new Ingress(resourceName.AsPulumiName(), ingress, providerResource.AsResourceOptions());
     }
 }

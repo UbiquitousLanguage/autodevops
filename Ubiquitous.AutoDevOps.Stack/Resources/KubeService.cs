@@ -5,7 +5,7 @@ using Pulumi.Kubernetes.Types.Inputs.Core.V1;
 using Ubiquitous.AutoDevOps.Stack.Factories;
 using static Ubiquitous.AutoDevOps.Stack.AutoDevOpsSettings;
 
-namespace Ubiquitous.AutoDevOps.Stack.Resources; 
+namespace Ubiquitous.AutoDevOps.Stack.Resources;
 
 [PublicAPI]
 public static class KubeService {
@@ -118,10 +118,6 @@ public static class KubeService {
             };
         configureService?.Invoke(serviceArgs);
 
-        return new Service(
-            resourceName.AsPulumiName(),
-            serviceArgs,
-            new CustomResourceOptions {Provider = providerResource}
-        );
+        return new Service(resourceName.AsPulumiName(), serviceArgs, providerResource.AsResourceOptions());
     }
 }

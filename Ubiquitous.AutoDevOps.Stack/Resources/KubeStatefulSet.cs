@@ -1,4 +1,3 @@
-using System;
 using JetBrains.Annotations;
 using Pulumi;
 using Pulumi.Kubernetes.Apps.V1;
@@ -65,10 +64,6 @@ public static class KubeStatefulSet {
         };
         configureStatefulSet?.Invoke(statefulSetArgs);
 
-        return new StatefulSet(
-            resourceName.AsPulumiName(),
-            statefulSetArgs,
-            new CustomResourceOptions { Provider = providerResource }
-        );
+        return new StatefulSet(resourceName.AsPulumiName(), statefulSetArgs, providerResource.AsResourceOptions());
     }
 }

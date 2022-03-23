@@ -7,7 +7,7 @@ using Ubiquitous.AutoDevOps.Stack.Factories;
 using static Ubiquitous.AutoDevOps.Stack.AutoDevOpsSettings;
 using Deployment = Pulumi.Kubernetes.Apps.V1.Deployment;
 
-namespace Ubiquitous.AutoDevOps.Stack.Resources; 
+namespace Ubiquitous.AutoDevOps.Stack.Resources;
 
 public static class KubeDeployment {
     public static Deployment Create(
@@ -55,10 +55,6 @@ public static class KubeDeployment {
         };
         configureDeployment?.Invoke(deployment);
 
-        return new Deployment(
-            resourceName.AsPulumiName(),
-            deployment,
-            new CustomResourceOptions { Provider = providerResource }
-        );
+        return new Deployment(resourceName.AsPulumiName(), deployment, providerResource.AsResourceOptions());
     }
 }

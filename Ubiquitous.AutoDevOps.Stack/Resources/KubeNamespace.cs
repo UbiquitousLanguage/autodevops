@@ -15,14 +15,38 @@ public static class KubeNamespace {
     /// <returns></returns>
     public static Namespace Create(
         string name, Dictionary<string, string>? annotations = null, ProviderResource? providerResource = null
-    ) {
-        var namespaceAnnotations = (annotations ?? new Dictionary<string, string>())
-            .AsInputMap();
-
-        return new Namespace(
+    )
+        => new(
             name,
-            new NamespaceArgs { Metadata = new ObjectMetaArgs { Name = name, Annotations = namespaceAnnotations } },
-            new CustomResourceOptions { Provider = providerResource }
+            new NamespaceBuilder(name).WithAnnotations(annotations).Build(),
+            providerResource.AsResourceOptions()
         );
+}
+
+public class NamespaceBuilder {
+    readonly ObjectMetaArgs _meta = new();
+
+    public NamespaceBuilder(string name) => _meta.Name = name;
+
+    public NamespaceBuilder WithAnnotations(Dictionary<string, string>? annotations) {
+        if (annotations != null) _meta.Annotations = annotations;
+        return this;
     }
+
+    public NamespaceBuilder WithLabels(Dictionary<string, string>? labels) {
+        if (labels != null) _meta.Labels = labels;
+        return this;
+    }
+
+    public NamespaceBuilder ConfigureMeta(Action<ObjectMetaArgs> configure) {
+        configure(_meta);
+        return this;
+    }
+
+    public NamespaceArgs Build() => new() { Metadata = _meta };
+}
+
+public static class ProviderExtensions {
+    public static CustomResourceOptions? AsResourceOptions(this ProviderResource? providerResource)
+        => providerResource == null ? null : new CustomResourceOptions();
 }

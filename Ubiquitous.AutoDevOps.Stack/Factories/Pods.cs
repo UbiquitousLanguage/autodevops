@@ -31,7 +31,7 @@ public static class Pods {
                 appSettings.PortName,
                 (c, p) =>
                     c.Ports = new[] {
-                        new ContainerPortArgs {Name = p, ContainerPortValue = appSettings.Port}
+                        new ContainerPortArgs { Name = p, ContainerPortValue = appSettings.Port }
                     }
             )
             .When(
@@ -47,7 +47,7 @@ public static class Pods {
                 appSecret,
                 (c, s) =>
                     c.EnvFrom = new EnvFromSourceArgs {
-                        SecretRef = new SecretEnvSourceArgs {Name = s.Metadata.Apply(x => x.Name)}
+                        SecretRef = new SecretEnvSourceArgs { Name = s.Metadata.Apply(x => x.Name) }
                     }
             )
             .WhenNotEmptyString(
@@ -63,7 +63,7 @@ public static class Pods {
 
         configureContainer?.Invoke(container);
 
-        var containers = new List<ContainerArgs> {container};
+        var containers = new List<ContainerArgs> { container };
         if (sidecars != null) containers.AddRange(sidecars);
 
         return containers;
@@ -103,8 +103,8 @@ public static class Pods {
     /// <returns></returns>
     public static InputMap<string> Resource(string cpu, string memory)
         => new() {
-            {"cpu", cpu},
-            {"memory", memory}
+            { "cpu", cpu },
+            { "memory", memory }
         };
 
     /// <summary>
@@ -124,18 +124,18 @@ public static class Pods {
     public static InputList<LocalObjectReferenceArgs> ImagePullSecrets(params Output<string>?[] imagePullSecrets)
         => imagePullSecrets
             .Where(x => x != null)
-            .Select(x => new LocalObjectReferenceArgs {Name = x!})
+            .Select(x => new LocalObjectReferenceArgs { Name = x! })
             .ToArray();
 
-    public static EnvVarArgs EnvVar(string name, string value) => new() {Name = name, Value = value};
+    public static EnvVarArgs EnvVar(string name, string value) => new() { Name = name, Value = value };
 
     public static VolumeMountArgs VolumeMount(string name, string mountPath)
-        => new() {Name = name, MountPath = mountPath};
-        
+        => new() { Name = name, MountPath = mountPath };
+
     public static EnvVarArgs FieldFrom(string envName, string field)
         => new() {
             Name      = envName,
-            ValueFrom = new EnvVarSourceArgs {FieldRef = new ObjectFieldSelectorArgs {FieldPath = field}}
+            ValueFrom = new EnvVarSourceArgs { FieldRef = new ObjectFieldSelectorArgs { FieldPath = field } }
         };
 
     /// <summary>

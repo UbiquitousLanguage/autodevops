@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Pulumi;
 using Pulumi.Kubernetes.Batch.V1Beta1;
 using Pulumi.Kubernetes.Core.V1;
 using Pulumi.Kubernetes.Types.Inputs.Batch.V1;
@@ -9,7 +10,7 @@ using CronJobArgs = Pulumi.Kubernetes.Types.Inputs.Batch.V1Beta1.CronJobArgs;
 using CronJobSpecArgs = Pulumi.Kubernetes.Types.Inputs.Batch.V1Beta1.CronJobSpecArgs;
 using JobTemplateSpecArgs = Pulumi.Kubernetes.Types.Inputs.Batch.V1Beta1.JobTemplateSpecArgs;
 
-namespace Ubiquitous.AutoDevOps.Stack.Resources; 
+namespace Ubiquitous.AutoDevOps.Stack.Resources;
 
 [PublicAPI]
 public class KubeCronJob {
@@ -23,7 +24,8 @@ public class KubeCronJob {
         Secret                 imagePullSecret,
         Secret?                appSecret,
         Action<ContainerArgs>? configureContainer = null,
-        Action<PodSpecArgs>?   configurePod       = null
+        Action<PodSpecArgs>?   configurePod       = null,
+        ProviderResource?      providerResource   = null
     ) {
         var appLabels         = Meta.AppLabels(appSettings, resourceName, deploySettings.Release);
         var gitLabAnnotations = gitLabSettings.GitLabAnnotations();
@@ -64,7 +66,8 @@ public class KubeCronJob {
                         Spec = new JobSpecArgs { Template = podTemplate }
                     }
                 }
-            }
+            },
+            providerResource.AsResourceOptions()
         );
     }
 }
